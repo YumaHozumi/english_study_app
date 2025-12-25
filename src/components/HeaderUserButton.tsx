@@ -9,54 +9,28 @@ export function HeaderUserButton() {
 
     if (status === 'loading') {
         return (
-            <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                background: 'var(--border-color)',
-                animation: 'pulse 1.5s ease-in-out infinite',
-            }} />
+            <div className="w-8 h-8 rounded-full bg-[var(--border-color)] animate-pulse" />
         );
     }
 
     return (
         <Link
             href="/settings"
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                textDecoration: 'none',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                overflow: 'hidden',
-            }}
+            className="flex items-center justify-center w-8 h-8 rounded-full no-underline transition-transform duration-200 overflow-hidden outline-none"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
             title={session?.user ? session.user.name || 'Account' : 'Sign in'}
         >
             {session?.user?.image ? (
                 <img
                     src={session.user.image}
                     alt={session.user.name || 'User'}
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                    }}
+                    className="w-full h-full object-cover"
                 />
             ) : (
-                <div style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: session?.user
-                        ? 'var(--primary-color)'
-                        : 'var(--border-color)',
-                    color: session?.user ? 'white' : 'var(--text-secondary)',
-                }}>
+                <div className={`w-full h-full flex items-center justify-center ${session?.user
+                        ? 'bg-[var(--primary-color)] text-white'
+                        : 'bg-[var(--border-color)] text-[var(--text-secondary)]'
+                    }`}>
                     <User size={18} />
                 </div>
             )}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { SearchResult } from '../../types';
 import { SwipeableCard } from './SwipeableCard';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { RotateCcw } from 'lucide-react';
 
 interface FlashcardStackProps {
@@ -12,18 +12,15 @@ interface FlashcardStackProps {
 
 export const FlashcardStack = ({ results, onSave, onDiscard }: FlashcardStackProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [history, setHistory] = useState<number[]>([]); // Track indices for undo
+    const [history, setHistory] = useState<number[]>([]);
     const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
 
-    // We only show the current card and the one immediately after it
     const activeResult = results[currentIndex];
     const nextResult = results[currentIndex + 1];
 
     const handleSwipe = (direction: 'left' | 'right') => {
-        // Set direction first for exit animation
         setSwipeDirection(direction);
 
-        // Small delay to let exit animation use the direction
         setTimeout(() => {
             if (direction === 'right') {
                 onSave(activeResult);
@@ -33,7 +30,7 @@ export const FlashcardStack = ({ results, onSave, onDiscard }: FlashcardStackPro
 
             setHistory((prev) => [...prev, currentIndex]);
             setCurrentIndex((prev) => prev + 1);
-            setSwipeDirection(null); // Reset for next card
+            setSwipeDirection(null);
         }, 50);
     };
 
@@ -46,7 +43,7 @@ export const FlashcardStack = ({ results, onSave, onDiscard }: FlashcardStackPro
 
     if (!activeResult) {
         return (
-            <div style={{ textAlign: 'center', padding: '4rem', color: '#718096' }}>
+            <div className="text-center py-16 text-[var(--text-secondary)]">
                 <h3>No more cards!</h3>
                 <p>You've reviewed all generated words.</p>
             </div>
@@ -54,25 +51,13 @@ export const FlashcardStack = ({ results, onSave, onDiscard }: FlashcardStackPro
     }
 
     return (
-        <div style={{ position: 'relative', width: '100%', maxWidth: '400px', height: '600px', margin: '0 auto' }}>
-            {/* Helper text / Undo Button Area */}
-            <div style={{ position: 'absolute', top: -50, width: '100%', display: 'flex', justifyContent: 'flex-end', paddingRight: '1rem', zIndex: 10 }}>
+        <div className="relative w-full max-w-[400px] h-[600px] mx-auto">
+            {/* Undo Button */}
+            <div className="absolute -top-12 w-full flex justify-end pr-4 z-10">
                 {history.length > 0 && (
                     <button
                         onClick={handleUndo}
-                        style={{
-                            background: 'white',
-                            border: 'none',
-                            borderRadius: '50%',
-                            width: '40px',
-                            height: '40px',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#4a5568'
-                        }}
+                        className="bg-[var(--card-bg)] border-none rounded-full w-10 h-10 shadow-md cursor-pointer flex items-center justify-center text-[var(--text-secondary)]"
                         title="Undo"
                     >
                         <RotateCcw size={20} />
@@ -80,31 +65,15 @@ export const FlashcardStack = ({ results, onSave, onDiscard }: FlashcardStackPro
                 )}
             </div>
 
-            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                {/* Background Card (The "next" card) */}
+            <div className="relative w-full h-full">
+                {/* Background Card */}
                 {nextResult && (
                     <div
                         key={`next-${currentIndex + 1}`}
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            marginLeft: 'auto',
-                            marginRight: 'auto',
-                            width: '100%',
-                            maxWidth: '400px',
-                            height: '500px',
-                            backgroundColor: '#f7fafc',
-                            borderRadius: '20px',
-                            border: '1px solid #e2e8f0',
-                            transform: 'scale(0.95) translateY(10px)',
-                            zIndex: 0,
-                        }}
+                        className="absolute top-0 left-0 right-0 mx-auto w-full max-w-[400px] h-[500px] bg-gray-100 rounded-2xl border border-gray-200 scale-95 translate-y-2.5 z-0"
                     >
-                        {/* Simplified preview of next card */}
-                        <div style={{ padding: '2rem', opacity: 0.5, filter: 'blur(1px)' }}>
-                            <h2 style={{ fontSize: '2rem', textAlign: 'center' }}>{nextResult.word}</h2>
+                        <div className="p-8 opacity-50 blur-[1px]">
+                            <h2 className="text-3xl text-center">{nextResult.word}</h2>
                         </div>
                     </div>
                 )}

@@ -9,17 +9,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <AuthProvider>
             <ThemeProvider>
-                <div className="app-container" style={{ paddingBottom: '80px' }}>
-                    <header style={{
-                        marginBottom: '1.5rem',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '0 1rem',
-                    }}>
-                        <div style={{ textAlign: 'left' }}>
-                            <h1 style={{ fontSize: '1.5rem', margin: 0 }}>English Study App</h1>
-                            <p style={{ opacity: 0.6, fontSize: '0.9rem', margin: 0 }}>Turn your searches into study notes</p>
+                <div className="app-container pb-20">
+                    <header className="mb-6 flex justify-between items-center px-4">
+                        <div className="text-left">
+                            <h1 className="text-2xl m-0">English Study App</h1>
+                            <p className="opacity-60 text-sm m-0">Turn your searches into study notes</p>
                         </div>
                         <HeaderUserButton />
                     </header>

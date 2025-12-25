@@ -39,7 +39,6 @@ export default function SearchPage() {
 
     const handleSave = (result: SearchResult) => {
         if (session?.user) {
-            // Save to database for logged-in users
             startTransition(async () => {
                 try {
                     await saveVocabularyEntry(result);
@@ -49,11 +48,9 @@ export default function SearchPage() {
                 }
             });
         } else {
-            // Save to localStorage for anonymous users
             VocabularyStorage.save(result);
             console.log('Saved to localStorage:', result.word);
 
-            // Show toast for sync promotion after every 3 saves
             const newCount = savedCount + 1;
             setSavedCount(newCount);
             if (newCount % 3 === 0) {
@@ -65,7 +62,7 @@ export default function SearchPage() {
     return (
         <div>
             <SearchInput onSearch={handleSearch} isLoading={isLoading || isPending} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="flex flex-col gap-4">
                 {results.length > 0 && (
                     <FlashcardStack
                         results={results}
@@ -77,7 +74,6 @@ export default function SearchPage() {
                 )}
             </div>
 
-            {/* Toast for sync promotion */}
             <AnimatePresence>
                 {showToast && (
                     <Toast

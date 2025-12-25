@@ -9,7 +9,6 @@ import type { WordEntry, SearchResult } from '@/types';
 import { FlashcardStack } from '@/components/Flashcard/FlashcardStack';
 import { ArrowLeft } from 'lucide-react';
 
-// Convert DB entry to WordEntry type
 type DbEntry = {
     id: string;
     userId: string;
@@ -45,11 +44,9 @@ export default function StudyPage() {
         if (status === 'loading') return;
 
         if (session?.user) {
-            // Fetch from database for logged-in users
             startTransition(async () => {
                 try {
                     const entries = await getVocabularyEntries();
-                    // Shuffle for random order
                     const shuffled = [...entries.map(toWordEntry)].sort(() => Math.random() - 0.5);
                     setWords(shuffled);
                 } catch (error) {
@@ -59,16 +56,13 @@ export default function StudyPage() {
                 }
             });
         } else {
-            // Use localStorage for anonymous users
             const allWords = VocabularyStorage.getAll();
-            // Shuffle for random order
             const shuffled = [...allWords].sort(() => Math.random() - 0.5);
             setWords(shuffled);
             setIsLoading(false);
         }
     }, [session, status]);
 
-    // Convert WordEntry to SearchResult for FlashcardStack compatibility
     const results: SearchResult[] = useMemo(() =>
         words.map(({ word, phonetic, meaning, example, exampleJp }) => ({
             word, phonetic, meaning, example, exampleJp
@@ -76,7 +70,7 @@ export default function StudyPage() {
 
     if (status === 'loading' || isLoading || isPending) {
         return (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#718096' }}>
+            <div className="p-8 text-center text-[var(--text-secondary)]">
                 <p>Loading...</p>
             </div>
         );
@@ -84,20 +78,12 @@ export default function StudyPage() {
 
     if (words.length === 0) {
         return (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#718096' }}>
+            <div className="p-8 text-center text-[var(--text-secondary)]">
                 <h2>No words to study</h2>
                 <p>Add some words first!</p>
                 <button
                     onClick={() => router.push('/search')}
-                    style={{
-                        marginTop: '1rem',
-                        padding: '0.75rem 1.5rem',
-                        background: '#667eea',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                    }}
+                    className="mt-4 px-6 py-3 bg-indigo-500 text-white border-none rounded-lg cursor-pointer"
                 >
                     Go to Search
                 </button>
@@ -106,26 +92,19 @@ export default function StudyPage() {
     }
 
     return (
-        <div style={{ padding: '1rem', maxWidth: '600px', margin: '0 auto' }}>
-            <header style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="p-4 max-w-[600px] mx-auto">
+            <header className="mb-4 flex items-center gap-4">
                 <button
                     onClick={() => router.push('/vocabulary')}
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: '0.5rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                    }}
+                    className="bg-transparent border-none cursor-pointer p-2 flex items-center"
                 >
-                    <ArrowLeft size={24} color="#4a5568" />
+                    <ArrowLeft size={24} className="text-[var(--text-secondary)]" />
                 </button>
                 <div>
-                    <h1 style={{ fontSize: '1.25rem', margin: 0 }}>📖 Study Mode</h1>
-                    <p style={{ color: '#718096', fontSize: '0.85rem', margin: 0 }}>
+                    <h1 className="text-xl m-0">📖 Study Mode</h1>
+                    <p className="text-[var(--text-secondary)] text-sm m-0">
                         {words.length} words to review
-                        {session?.user && <span style={{ marginLeft: '0.5rem', color: '#48bb78' }}>✓ Synced</span>}
+                        {session?.user && <span className="ml-2 text-green-500">✓ Synced</span>}
                     </p>
                 </div>
             </header>

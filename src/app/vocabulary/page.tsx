@@ -8,10 +8,8 @@ import { VocabularyStorage } from '@/services/vocabulary';
 import type { WordEntry, SearchResult } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, RotateCcw, BookOpen } from 'lucide-react';
-import '@/components/Search/SearchInput.css';
 import { WordDetailModal } from '@/components/Vocabulary/WordDetailModal';
 
-// Convert DB entry to WordEntry type
 type DbEntry = {
     id: string;
     userId: string;
@@ -49,7 +47,6 @@ export default function VocabularyPage() {
         if (status === 'loading') return;
 
         if (session?.user) {
-            // Fetch from database for logged-in users
             startTransition(async () => {
                 try {
                     const entries = await getVocabularyEntries();
@@ -59,14 +56,12 @@ export default function VocabularyPage() {
                 }
             });
         } else {
-            // Use localStorage for anonymous users
             setWords(VocabularyStorage.getAll());
         }
     }, [session, status]);
 
     const handleDelete = async (id: string) => {
         if (session?.user) {
-            // Delete from database
             startTransition(async () => {
                 try {
                     const deleted = await deleteVocabularyEntry(id);
@@ -78,7 +73,6 @@ export default function VocabularyPage() {
                 }
             });
         } else {
-            // Delete from localStorage
             const deleted = VocabularyStorage.delete(id);
             if (deleted) {
                 setDeletedWord(deleted);
@@ -93,8 +87,6 @@ export default function VocabularyPage() {
             setWords(VocabularyStorage.getAll());
             setDeletedWord(null);
         }
-        // Note: Undo for DB is more complex (would need to re-insert)
-        // For now, just clear the undo state
         setDeletedWord(null);
     };
 
@@ -105,59 +97,40 @@ export default function VocabularyPage() {
 
     if (status === 'loading') {
         return (
-            <div style={{ padding: '1rem', textAlign: 'center' }}>
+            <div className="p-4 text-center">
                 <p>Loading...</p>
             </div>
         );
     }
 
     return (
-        <div style={{ padding: '1rem', maxWidth: '600px', margin: '0 auto' }}>
-            <header style={{ marginBottom: '1.5rem' }}>
-                <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="p-4 max-w-[600px] mx-auto">
+            <header className="mb-6">
+                <h1 className="text-2xl mb-2 flex items-center gap-2">
                     📚 My Vocabulary
                 </h1>
-                <p style={{ color: '#718096', fontSize: '0.9rem' }}>
+                <p className="text-[var(--text-secondary)] text-sm">
                     Total: {words.length} words
-                    {session?.user && <span style={{ marginLeft: '0.5rem', color: '#48bb78' }}>✓ Synced</span>}
-                    {!session?.user && words.length > 0 && <span style={{ marginLeft: '0.5rem', color: '#ed8936' }}>⚡ Local only</span>}
+                    {session?.user && <span className="ml-2 text-green-500">✓ Synced</span>}
+                    {!session?.user && words.length > 0 && <span className="ml-2 text-orange-500">⚡ Local only</span>}
                 </p>
             </header>
 
-            {/* Login promotion banner for non-logged-in users */}
+            {/* Login promotion banner */}
             {!session?.user && words.length > 0 && (
-                <div style={{
-                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
-                    border: '1px solid rgba(102, 126, 234, 0.3)',
-                    borderRadius: '12px',
-                    padding: '1rem',
-                    marginBottom: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                }}>
-                    <div style={{ fontSize: '1.5rem' }}>💡</div>
-                    <div style={{ flex: 1 }}>
-                        <p style={{ margin: 0, fontWeight: 500, color: 'var(--text-color)' }}>
+                <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-xl p-4 mb-4 flex items-center gap-4">
+                    <div className="text-2xl">💡</div>
+                    <div className="flex-1">
+                        <p className="m-0 font-medium text-[var(--text-color)]">
                             Sync across devices
                         </p>
-                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                        <p className="mt-1 text-sm text-[var(--text-secondary)]">
                             Sign in to access your vocabulary from any device
                         </p>
                     </div>
                     <button
                         onClick={() => router.push('/settings')}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            background: 'var(--primary-color)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            fontSize: '0.85rem',
-                            fontWeight: 500,
-                            whiteSpace: 'nowrap',
-                        }}
+                        className="px-4 py-2 bg-[var(--primary-color)] text-white border-none rounded-lg cursor-pointer text-sm font-medium whitespace-nowrap"
                     >
                         Sign in
                     </button>
@@ -167,16 +140,15 @@ export default function VocabularyPage() {
             {/* Search Filter */}
             <input
                 type="text"
-                className="search-input"
+                className="w-full mb-4 px-4 py-3 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl text-[var(--text-color)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
                 placeholder="Search words..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ marginBottom: '1rem', width: '100%' }}
             />
 
             {/* Loading indicator */}
             {isPending && (
-                <div style={{ textAlign: 'center', padding: '1rem', color: '#718096' }}>
+                <div className="text-center p-4 text-[var(--text-secondary)]">
                     Processing...
                 </div>
             )}
@@ -188,31 +160,12 @@ export default function VocabularyPage() {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        style={{
-                            background: '#2d3748',
-                            color: 'white',
-                            padding: '0.75rem 1rem',
-                            borderRadius: '8px',
-                            marginBottom: '1rem',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                        }}
+                        className="bg-gray-800 text-white px-4 py-3 rounded-lg mb-4 flex justify-between items-center"
                     >
                         <span>Deleted &quot;{deletedWord.word}&quot;</span>
                         <button
                             onClick={handleUndo}
-                            style={{
-                                background: 'none',
-                                border: '1px solid white',
-                                color: 'white',
-                                padding: '0.25rem 0.75rem',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                            }}
+                            className="bg-transparent border border-white text-white px-3 py-1 rounded cursor-pointer flex items-center gap-1"
                         >
                             <RotateCcw size={14} /> Undo
                         </button>
@@ -221,7 +174,7 @@ export default function VocabularyPage() {
             </AnimatePresence>
 
             {/* Word List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="flex flex-col gap-3">
                 <AnimatePresence>
                     {filteredWords.map((entry) => (
                         <motion.div
@@ -231,54 +184,29 @@ export default function VocabularyPage() {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 100 }}
                             onClick={() => setSelectedWord(entry)}
-                            style={{
-                                background: 'white',
-                                padding: '1rem',
-                                borderRadius: '12px',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start',
-                                cursor: 'pointer',
-                                transition: 'transform 0.15s, box-shadow 0.15s',
-                                WebkitTapHighlightColor: 'transparent',
-                                outline: 'none',
-                                userSelect: 'none',
-                            }}
+                            className="bg-[var(--card-bg)] p-4 rounded-xl shadow-md flex justify-between items-start cursor-pointer select-none transition-transform duration-150 outline-none"
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
                             whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0,0,0,0.12)' }}
                             whileTap={{ scale: 0.98 }}
                         >
-                            <div style={{ flex: 1 }}>
-                                <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem', color: '#2d3748' }}>
+                            <div className="flex-1">
+                                <h3 className="text-lg mb-1 text-[var(--text-color)]">
                                     {entry.word}
                                 </h3>
-                                <p style={{ fontSize: '0.85rem', color: '#718096', marginBottom: '0.5rem' }}>
+                                <p className="text-sm text-[var(--text-secondary)] mb-2">
                                     {entry.phonetic}
                                 </p>
-                                <p style={{
-                                    fontSize: '0.9rem',
-                                    color: '#4a5568',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                    maxWidth: '280px',
-                                }}>
+                                <p className="text-sm text-[var(--text-color)] overflow-hidden text-ellipsis whitespace-nowrap max-w-[280px]">
                                     {entry.meaning}
                                 </p>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                <span style={{ fontSize: '0.75rem', color: '#a0aec0' }}>
+                            <div className="flex gap-2 items-center">
+                                <span className="text-xs text-gray-400">
                                     {new Date(entry.timestamp).toLocaleDateString()}
                                 </span>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); handleDelete(entry.id); }}
-                                    style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        color: '#e53e3e',
-                                        cursor: 'pointer',
-                                        padding: '0.25rem',
-                                    }}
+                                    className="bg-transparent border-none text-red-500 cursor-pointer p-1"
                                     title="Delete"
                                 >
                                     <Trash2 size={18} />
@@ -291,9 +219,9 @@ export default function VocabularyPage() {
 
             {/* Empty State */}
             {words.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '3rem', color: '#718096' }}>
+                <div className="text-center py-12 text-[var(--text-secondary)]">
                     <p>No words saved yet.</p>
-                    <p style={{ fontSize: '0.9rem' }}>Search and swipe right to save words!</p>
+                    <p className="text-sm">Search and swipe right to save words!</p>
                 </div>
             )}
 
@@ -301,22 +229,7 @@ export default function VocabularyPage() {
             {words.length > 0 && (
                 <button
                     onClick={() => router.push('/study')}
-                    style={{
-                        width: '100%',
-                        marginTop: '2rem',
-                        padding: '1rem',
-                        fontSize: '1rem',
-                        fontWeight: 600,
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '12px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                    }}
+                    className="w-full mt-8 p-4 text-base font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-none rounded-xl cursor-pointer flex items-center justify-center gap-2"
                 >
                     <BookOpen size={20} /> Start Study Mode
                 </button>

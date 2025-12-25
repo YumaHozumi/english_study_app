@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -25,54 +25,20 @@ export function Toast({ message, action, duration = 5000, onClose }: ToastProps)
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            style={{
-                position: 'fixed',
-                bottom: '100px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'var(--text-color)',
-                color: 'var(--card-bg)',
-                padding: '0.75rem 1rem',
-                borderRadius: '12px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                zIndex: 1000,
-                maxWidth: 'calc(100vw - 2rem)',
-            }}
+            className="fixed bottom-[100px] left-1/2 -translate-x-1/2 bg-[var(--text-color)] text-[var(--card-bg)] px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 z-[1000] max-w-[calc(100vw-2rem)]"
         >
-            <span style={{ fontSize: '0.9rem' }}>{message}</span>
+            <span className="text-sm">{message}</span>
             {action && (
                 <button
                     onClick={action.onClick}
-                    style={{
-                        background: 'var(--primary-color)',
-                        color: 'white',
-                        border: 'none',
-                        padding: '0.4rem 0.75rem',
-                        borderRadius: '6px',
-                        fontSize: '0.85rem',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        whiteSpace: 'nowrap',
-                    }}
+                    className="bg-[var(--primary-color)] text-white border-none px-3 py-1.5 rounded-md text-sm font-medium cursor-pointer whitespace-nowrap"
                 >
                     {action.label}
                 </button>
             )}
             <button
                 onClick={onClose}
-                style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--card-bg)',
-                    opacity: 0.7,
-                    cursor: 'pointer',
-                    padding: '0.25rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                }}
+                className="bg-transparent border-none text-[var(--card-bg)] opacity-70 cursor-pointer p-1 flex items-center"
             >
                 <X size={16} />
             </button>
@@ -80,7 +46,6 @@ export function Toast({ message, action, duration = 5000, onClose }: ToastProps)
     );
 }
 
-// Toast container for multiple toasts
 interface ToastData {
     id: string;
     message: string;

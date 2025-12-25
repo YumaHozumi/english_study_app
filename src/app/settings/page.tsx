@@ -29,142 +29,63 @@ export default function SettingsPage() {
     };
 
     return (
-        <div style={{ padding: '1rem', maxWidth: '600px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>⚙️ Settings</h1>
+        <div className="p-4 max-w-[600px] mx-auto">
+            <h1 className="text-2xl mb-6">⚙️ Settings</h1>
 
             {/* Account Section */}
-            <div style={{
-                background: 'var(--card-bg)',
-                padding: '1.25rem',
-                borderRadius: '12px',
-                boxShadow: 'var(--shadow)',
-                marginBottom: '1rem',
-            }}>
-                <h2 style={{
-                    fontSize: '0.85rem',
-                    color: 'var(--text-secondary)',
-                    marginBottom: '1rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                }}>
+            <div className="bg-[var(--card-bg)] p-5 rounded-xl shadow-md mb-4">
+                <h2 className="text-sm text-[var(--text-secondary)] mb-4 uppercase tracking-wide">
                     Account
                 </h2>
 
                 {status === 'loading' ? (
-                    <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    <div className="p-4 text-center text-[var(--text-secondary)]">
                         Loading...
                     </div>
                 ) : session?.user ? (
-                    // Logged in state
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-4">
                             {session.user.image ? (
                                 <img
                                     src={session.user.image}
                                     alt={session.user.name || 'User'}
-                                    style={{
-                                        width: '48px',
-                                        height: '48px',
-                                        borderRadius: '50%',
-                                    }}
+                                    className="w-12 h-12 rounded-full"
                                 />
                             ) : (
-                                <div style={{
-                                    width: '48px',
-                                    height: '48px',
-                                    borderRadius: '50%',
-                                    background: 'var(--primary-color)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: 'white',
-                                }}>
+                                <div className="w-12 h-12 rounded-full bg-[var(--primary-color)] flex items-center justify-center text-white">
                                     <User size={24} />
                                 </div>
                             )}
                             <div>
-                                <p style={{
-                                    fontWeight: 600,
-                                    color: 'var(--text-color)',
-                                    margin: 0,
-                                }}>
+                                <p className="font-semibold text-[var(--text-color)] m-0">
                                     {session.user.name}
                                 </p>
-                                <p style={{
-                                    fontSize: '0.85rem',
-                                    color: 'var(--text-secondary)',
-                                    margin: 0,
-                                }}>
+                                <p className="text-sm text-[var(--text-secondary)] m-0">
                                     {session.user.email}
                                 </p>
                             </div>
                         </div>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.5rem 0',
-                            borderTop: '1px solid var(--border-color)',
-                        }}>
-                            <span style={{
-                                fontSize: '0.8rem',
-                                color: 'var(--text-secondary)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                            }}>
+                        <div className="flex items-center gap-2 py-2 border-t border-[var(--border-color)]">
+                            <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1">
                                 ✅ Synced across devices
                             </span>
                         </div>
                         <button
                             onClick={() => signOut()}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.5rem',
-                                padding: '0.75rem 1rem',
-                                background: 'transparent',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '8px',
-                                color: 'var(--text-color)',
-                                cursor: 'pointer',
-                                fontSize: '0.9rem',
-                                transition: 'background 0.2s',
-                            }}
+                            className="flex items-center justify-center gap-2 px-4 py-3 bg-transparent border border-[var(--border-color)] rounded-lg text-[var(--text-color)] cursor-pointer text-sm transition-colors hover:bg-[var(--border-color)]/20"
                         >
                             <LogOut size={18} />
                             Sign Out
                         </button>
                     </div>
                 ) : (
-                    // Not logged in state
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <p style={{
-                            fontSize: '0.9rem',
-                            color: 'var(--text-secondary)',
-                            margin: 0,
-                            lineHeight: 1.5,
-                        }}>
+                    <div className="flex flex-col gap-4">
+                        <p className="text-sm text-[var(--text-secondary)] m-0 leading-relaxed">
                             Sign in to sync your vocabulary across all your devices.
                         </p>
                         <button
                             onClick={() => signIn('github')}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.5rem',
-                                padding: '0.75rem 1rem',
-                                background: 'var(--primary-color)',
-                                border: 'none',
-                                borderRadius: '8px',
-                                color: 'white',
-                                cursor: 'pointer',
-                                fontSize: '0.9rem',
-                                fontWeight: 500,
-                                transition: 'opacity 0.2s',
-                            }}
+                            className="flex items-center justify-center gap-2 px-4 py-3 bg-[var(--primary-color)] border-none rounded-lg text-white cursor-pointer text-sm font-medium transition-opacity hover:opacity-90"
                         >
                             <LogIn size={18} />
                             Sign in with GitHub
@@ -174,115 +95,52 @@ export default function SettingsPage() {
             </div>
 
             {/* Appearance Section */}
-            <div style={{
-                background: 'var(--card-bg)',
-                padding: '1.25rem',
-                borderRadius: '12px',
-                boxShadow: 'var(--shadow)',
-            }}>
-                <h2 style={{
-                    fontSize: '0.85rem',
-                    color: 'var(--text-secondary)',
-                    marginBottom: '1rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                }}>
+            <div className="bg-[var(--card-bg)] p-5 rounded-xl shadow-md">
+                <h2 className="text-sm text-[var(--text-secondary)] mb-4 uppercase tracking-wide">
                     Appearance
                 </h2>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                }}>
+                <div className="flex justify-between items-center">
                     <div>
-                        <h3 style={{ fontSize: '1rem', marginBottom: '0.25rem', color: 'var(--text-color)' }}>
+                        <h3 className="text-base mb-1 text-[var(--text-color)]">
                             Dark Mode
                         </h3>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
+                        <p className="text-sm text-[var(--text-secondary)] m-0">
                             Switch between light and dark themes
                         </p>
                     </div>
-                    {/* Toggle Switch */}
                     <button
                         onClick={toggleTheme}
                         role="switch"
                         aria-checked={isDark}
-                        style={{
-                            width: '52px',
-                            height: '28px',
-                            borderRadius: '999px',
-                            border: 'none',
-                            padding: '2px',
-                            cursor: 'pointer',
-                            background: isDark
-                                ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                                : '#cbd5e0',
-                            transition: 'background 0.3s ease',
-                            position: 'relative',
-                        }}
+                        className={`w-[52px] h-7 rounded-full border-none p-0.5 cursor-pointer relative transition-colors duration-300 ${isDark ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : 'bg-gray-300'
+                            }`}
                     >
                         <span
-                            style={{
-                                display: 'block',
-                                width: '24px',
-                                height: '24px',
-                                borderRadius: '50%',
-                                background: 'white',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                                transition: 'transform 0.3s ease',
-                                transform: isDark ? 'translateX(24px)' : 'translateX(0)',
-                            }}
+                            className={`block w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 ${isDark ? 'translate-x-6' : 'translate-x-0'
+                                }`}
                         />
                     </button>
                 </div>
             </div>
 
-            {/* Danger Zone - Only show for logged in users */}
+            {/* Danger Zone */}
             {session?.user && (
-                <div style={{
-                    marginTop: '1rem',
-                    background: 'var(--card-bg)',
-                    padding: '1.25rem',
-                    borderRadius: '12px',
-                    boxShadow: 'var(--shadow)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                }}>
-                    <h2 style={{
-                        fontSize: '0.85rem',
-                        color: '#ef4444',
-                        marginBottom: '1rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                    }}>
+                <div className="mt-4 bg-[var(--card-bg)] p-5 rounded-xl shadow-md border border-red-500/30">
+                    <h2 className="text-sm text-red-500 mb-4 uppercase tracking-wide">
                         Danger Zone
                     </h2>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                    }}>
+                    <div className="flex justify-between items-center">
                         <div>
-                            <h3 style={{ fontSize: '1rem', marginBottom: '0.25rem', color: 'var(--text-color)' }}>
+                            <h3 className="text-base mb-1 text-[var(--text-color)]">
                                 Delete Account
                             </h3>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
+                            <p className="text-sm text-[var(--text-secondary)] m-0">
                                 Permanently delete your account and all data
                             </p>
                         </div>
                         <button
                             onClick={() => setShowDeleteModal(true)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                padding: '0.5rem 1rem',
-                                background: 'transparent',
-                                border: '1px solid #ef4444',
-                                borderRadius: '8px',
-                                color: '#ef4444',
-                                cursor: 'pointer',
-                                fontSize: '0.85rem',
-                            }}
+                            className="flex items-center gap-2 px-4 py-2 bg-transparent border border-red-500 rounded-lg text-red-500 cursor-pointer text-sm"
                         >
                             <Trash2 size={16} />
                             Delete
@@ -292,85 +150,34 @@ export default function SettingsPage() {
             )}
 
             {/* Version info */}
-            <div style={{
-                marginTop: '2rem',
-                textAlign: 'center',
-                color: 'var(--text-secondary)',
-                fontSize: '0.8rem',
-            }}>
+            <div className="mt-8 text-center text-[var(--text-secondary)] text-xs">
                 <p>English Study App v0.1.0</p>
             </div>
 
             {/* Delete Account Modal */}
             {showDeleteModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000,
-                    padding: '1rem',
-                }}>
-                    <div style={{
-                        background: 'var(--card-bg)',
-                        borderRadius: '16px',
-                        padding: '1.5rem',
-                        maxWidth: '400px',
-                        width: '100%',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.75rem',
-                            marginBottom: '1rem',
-                        }}>
-                            <div style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '50%',
-                                background: 'rgba(239, 68, 68, 0.1)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}>
-                                <AlertTriangle size={20} color="#ef4444" />
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
+                    <div className="bg-[var(--card-bg)] rounded-2xl p-6 max-w-[400px] w-full shadow-2xl">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                                <AlertTriangle size={20} className="text-red-500" />
                             </div>
-                            <h3 style={{ margin: 0, color: 'var(--text-color)' }}>
+                            <h3 className="m-0 text-[var(--text-color)]">
                                 Delete Account
                             </h3>
                         </div>
 
-                        <p style={{
-                            color: 'var(--text-secondary)',
-                            fontSize: '0.9rem',
-                            lineHeight: 1.5,
-                            marginBottom: '1rem',
-                        }}>
+                        <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4">
                             This action cannot be undone. This will permanently delete:
                         </p>
 
-                        <ul style={{
-                            color: 'var(--text-color)',
-                            fontSize: '0.9rem',
-                            margin: '0 0 1rem 0',
-                            paddingLeft: '1.5rem',
-                        }}>
+                        <ul className="text-[var(--text-color)] text-sm mb-4 pl-6 list-disc">
                             <li>All your saved vocabulary</li>
                             <li>Your account information</li>
                             <li>All synced data</li>
                         </ul>
 
-                        <p style={{
-                            color: 'var(--text-secondary)',
-                            fontSize: '0.85rem',
-                            marginBottom: '0.5rem',
-                        }}>
+                        <p className="text-[var(--text-secondary)] text-sm mb-2">
                             Type <strong>delete</strong> to confirm:
                         </p>
 
@@ -379,51 +186,26 @@ export default function SettingsPage() {
                             value={deleteConfirmText}
                             onChange={(e) => setDeleteConfirmText(e.target.value)}
                             placeholder="delete"
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '8px',
-                                fontSize: '0.9rem',
-                                marginBottom: '1rem',
-                                background: 'var(--card-bg)',
-                                color: 'var(--text-color)',
-                            }}
+                            className="w-full px-3 py-3 border border-[var(--border-color)] rounded-lg text-sm mb-4 bg-[var(--card-bg)] text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-red-500"
                         />
 
-                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <div className="flex gap-3">
                             <button
                                 onClick={() => {
                                     setShowDeleteModal(false);
                                     setDeleteConfirmText('');
                                 }}
-                                style={{
-                                    flex: 1,
-                                    padding: '0.75rem',
-                                    background: 'transparent',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '8px',
-                                    color: 'var(--text-color)',
-                                    cursor: 'pointer',
-                                    fontSize: '0.9rem',
-                                }}
+                                className="flex-1 py-3 bg-transparent border border-[var(--border-color)] rounded-lg text-[var(--text-color)] cursor-pointer text-sm"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleDeleteAccount}
                                 disabled={deleteConfirmText !== 'delete' || isPending}
-                                style={{
-                                    flex: 1,
-                                    padding: '0.75rem',
-                                    background: deleteConfirmText === 'delete' ? '#ef4444' : '#ccc',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    color: 'white',
-                                    cursor: deleteConfirmText === 'delete' ? 'pointer' : 'not-allowed',
-                                    fontSize: '0.9rem',
-                                    fontWeight: 500,
-                                }}
+                                className={`flex-1 py-3 border-none rounded-lg text-white text-sm font-medium ${deleteConfirmText === 'delete'
+                                        ? 'bg-red-500 cursor-pointer'
+                                        : 'bg-gray-400 cursor-not-allowed'
+                                    }`}
                             >
                                 {isPending ? 'Deleting...' : 'Delete Account'}
                             </button>

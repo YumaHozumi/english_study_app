@@ -18,19 +18,18 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, style }: Swipeabl
         x,
         [-200, -100, 0, 100, 200],
         [
-            'rgba(255, 80, 80, 0.2)', // Left (Redish)
+            'rgba(255, 80, 80, 0.2)',
             'rgba(255, 80, 80, 0.1)',
-            'rgba(255, 255, 255, 1)',   // Center (White)
+            'rgba(255, 255, 255, 1)',
             'rgba(80, 255, 80, 0.1)',
-            'rgba(80, 255, 80, 0.2)'  // Right (Greenish)
+            'rgba(80, 255, 80, 0.2)'
         ]
     );
 
-    // Icon opacities
     const checkOpacity = useTransform(x, [50, 150], [0, 1]);
     const crossOpacity = useTransform(x, [-150, -50], [1, 0]);
 
-    const handleDragEnd = (_: any, info: PanInfo) => {
+    const handleDragEnd = (_: unknown, info: PanInfo) => {
         const threshold = 100;
         if (info.offset.x > threshold) {
             onSwipe('right');
@@ -45,8 +44,8 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, style }: Swipeabl
                 width: '100%',
                 maxWidth: '400px',
                 height: '500px',
-                backgroundColor: '#fff', // fallback
-                background: background as any, // motion value
+                backgroundColor: '#fff',
+                background: background as unknown as string,
                 borderRadius: '20px',
                 boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
                 position: 'absolute',
@@ -61,7 +60,7 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, style }: Swipeabl
                 opacity,
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center', // Center vertically
+                justifyContent: 'center',
                 alignItems: 'center',
                 padding: '2rem',
                 ...style
@@ -84,30 +83,30 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, style }: Swipeabl
             }}
         >
             {/* Overlay Icons */}
-            <motion.div style={{ position: 'absolute', top: 40, right: 40, opacity: checkOpacity, color: '#4CAF50' }}>
+            <motion.div className="absolute top-10 right-10 text-green-500" style={{ opacity: checkOpacity }}>
                 <Check size={64} strokeWidth={3} />
             </motion.div>
-            <motion.div style={{ position: 'absolute', top: 40, left: 40, opacity: crossOpacity, color: '#F44336' }}>
+            <motion.div className="absolute top-10 left-10 text-red-500" style={{ opacity: crossOpacity }}>
                 <X size={64} strokeWidth={3} />
             </motion.div>
 
-            <div style={{ textAlign: 'center', width: '100%' }}>
-                <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', color: '#2d3748' }}>{data.word}</h2>
-                <p style={{ fontSize: '1.2rem', color: '#718096', marginBottom: '2rem', fontStyle: 'italic' }}>{data.phonetic}</p>
+            <div className="text-center w-full">
+                <h2 className="text-4xl mb-2 text-gray-800">{data.word}</h2>
+                <p className="text-xl text-gray-500 mb-8 italic">{data.phonetic}</p>
 
-                <div style={{ textAlign: 'left', width: '100%', marginBottom: '1.5rem' }}>
-                    <h3 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: '#a0aec0', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>Meaning</h3>
-                    <p style={{ fontSize: '1.1rem', color: '#4a5568', lineHeight: 1.5 }}>{data.meaning}</p>
+                <div className="text-left w-full mb-6">
+                    <h3 className="text-sm uppercase text-gray-400 mb-2 tracking-wide">Meaning</h3>
+                    <p className="text-lg text-gray-600 leading-relaxed">{data.meaning}</p>
                 </div>
 
-                <div style={{ textAlign: 'left', width: '100%', flex: 1 }}>
-                    <h3 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: '#a0aec0', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>Example</h3>
-                    <p style={{ fontSize: '1rem', color: '#4a5568', marginBottom: '0.5rem' }}>{data.example}</p>
-                    <p style={{ fontSize: '0.9rem', color: '#718096' }}>{data.exampleJp}</p>
+                <div className="text-left w-full flex-1">
+                    <h3 className="text-sm uppercase text-gray-400 mb-2 tracking-wide">Example</h3>
+                    <p className="text-base text-gray-600 mb-2">{data.example}</p>
+                    <p className="text-sm text-gray-500">{data.exampleJp}</p>
                 </div>
             </div>
 
-            <div style={{ fontSize: '0.8rem', color: '#cbd5e0', marginTop: '1rem' }}>
+            <div className="text-xs text-gray-300 mt-4">
                 Swipe Right to Save • Left to Discard
             </div>
         </motion.div>
