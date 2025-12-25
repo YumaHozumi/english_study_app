@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { SearchInput } from '@/components/Search/SearchInput';
+import { TranslationSection } from '@/components/Search/TranslationSection';
 import { FlashcardStack } from '@/components/Flashcard/FlashcardStack';
 import { Toast } from '@/components/Toast';
 import { LLMService } from '@/services/llm';
@@ -17,6 +18,8 @@ export default function SearchPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [results, setResults] = useState<SearchResult[]>([]);
+    const [fullTranslation, setFullTranslation] = useState<string | null>(null);
+    const [originalText, setOriginalText] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
     const [showToast, setShowToast] = useState(false);
     const [savedCount, setSavedCount] = useState(0);
@@ -24,11 +27,17 @@ export default function SearchPage() {
     const handleSearch = async (query: string) => {
         setIsLoading(true);
         setResults([]);
+        setFullTranslation(null);
+        setOriginalText(null);
 
         try {
             const llm = new LLMService();
             const data = await llm.searchWord(query);
-            setResults(data);
+            setResults(data.results);
+            if (data.fullTranslation && data.originalText) {
+                setFullTranslation(data.fullTranslation);
+                setOriginalText(data.originalText);
+            }
         } catch (error) {
             console.error(error);
             alert('Failed to fetch data. Please check your connection.');
@@ -62,6 +71,15 @@ export default function SearchPage() {
     return (
         <div>
             <SearchInput onSearch={handleSearch} isLoading={isLoading || isPending} />
+
+            {/* Translation Section - shown only for sentences */}
+            {fullTranslation && originalText && (
+                <TranslationSection
+                    originalText={originalText}
+                    translation={fullTranslation}
+                />
+            )}
+
             <div className="flex flex-col gap-4">
                 {results.length > 0 && (
                     <FlashcardStack
@@ -92,3 +110,4 @@ export default function SearchPage() {
         </div>
     );
 }
+
