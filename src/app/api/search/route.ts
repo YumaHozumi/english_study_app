@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        const modelName = process.env.MODEL_NAME || 'gemini-2.0-flash-exp';
+        const model = genAI.getGenerativeModel({ model: modelName });
 
         const prompt = `You are an English teacher. The user has provided the following input: "${query}".
 
