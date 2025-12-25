@@ -120,8 +120,49 @@ export default function VocabularyPage() {
                 <p style={{ color: '#718096', fontSize: '0.9rem' }}>
                     Total: {words.length} words
                     {session?.user && <span style={{ marginLeft: '0.5rem', color: '#48bb78' }}>✓ Synced</span>}
+                    {!session?.user && words.length > 0 && <span style={{ marginLeft: '0.5rem', color: '#ed8936' }}>⚡ Local only</span>}
                 </p>
             </header>
+
+            {/* Login promotion banner for non-logged-in users */}
+            {!session?.user && words.length > 0 && (
+                <div style={{
+                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                    border: '1px solid rgba(102, 126, 234, 0.3)',
+                    borderRadius: '12px',
+                    padding: '1rem',
+                    marginBottom: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                }}>
+                    <div style={{ fontSize: '1.5rem' }}>💡</div>
+                    <div style={{ flex: 1 }}>
+                        <p style={{ margin: 0, fontWeight: 500, color: 'var(--text-color)' }}>
+                            Sync across devices
+                        </p>
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            Sign in to access your vocabulary from any device
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => router.push('/settings')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            background: 'var(--primary-color)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            fontWeight: 500,
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        Sign in
+                    </button>
+                </div>
+            )}
 
             {/* Search Filter */}
             <input
