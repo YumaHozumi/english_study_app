@@ -1,45 +1,115 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { getVocabularyEntries, deleteVocabularyEntry } from '@/actions/vocabulary';
 import { VocabularyStorage } from '@/services/vocabulary';
-import type { WordEntry } from '@/types';
+import type { WordEntry, SearchResult } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, RotateCcw, BookOpen } from 'lucide-react';
 import '@/components/Search/SearchInput.css';
 import { WordDetailModal } from '@/components/Vocabulary/WordDetailModal';
 
+// Convert DB entry to WordEntry type
+type DbEntry = {
+    id: string;
+    userId: string;
+    word: string;
+    phonetic: string;
+    meaning: string;
+    example: string;
+    exampleJp: string;
+    timestamp: number;
+    createdAt: Date | null;
+};
+
+function toWordEntry(entry: DbEntry): WordEntry {
+    return {
+        id: entry.id,
+        word: entry.word,
+        phonetic: entry.phonetic,
+        meaning: entry.meaning,
+        example: entry.example,
+        exampleJp: entry.exampleJp,
+        timestamp: entry.timestamp,
+    };
+}
+
 export default function VocabularyPage() {
+    const { data: session, status } = useSession();
     const [words, setWords] = useState<WordEntry[]>([]);
     const [deletedWord, setDeletedWord] = useState<WordEntry | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedWord, setSelectedWord] = useState<WordEntry | null>(null);
+    const [isPending, startTransition] = useTransition();
     const router = useRouter();
 
     useEffect(() => {
-        setWords(VocabularyStorage.getAll());
-    }, []);
+        if (status === 'loading') return;
 
-    const handleDelete = (id: string) => {
-        const deleted = VocabularyStorage.delete(id);
-        if (deleted) {
-            setDeletedWord(deleted);
+        if (session?.user) {
+            // Fetch from database for logged-in users
+            startTransition(async () => {
+                try {
+                    const entries = await getVocabularyEntries();
+                    setWords(entries.map(toWordEntry));
+                } catch (error) {
+                    console.error('Failed to fetch vocabulary:', error);
+                }
+            });
+        } else {
+            // Use localStorage for anonymous users
             setWords(VocabularyStorage.getAll());
+        }
+    }, [session, status]);
+
+    const handleDelete = async (id: string) => {
+        if (session?.user) {
+            // Delete from database
+            startTransition(async () => {
+                try {
+                    const deleted = await deleteVocabularyEntry(id);
+                    setDeletedWord(toWordEntry(deleted as DbEntry));
+                    const entries = await getVocabularyEntries();
+                    setWords(entries.map(toWordEntry));
+                } catch (error) {
+                    console.error('Failed to delete:', error);
+                }
+            });
+        } else {
+            // Delete from localStorage
+            const deleted = VocabularyStorage.delete(id);
+            if (deleted) {
+                setDeletedWord(deleted);
+                setWords(VocabularyStorage.getAll());
+            }
         }
     };
 
     const handleUndo = () => {
-        if (deletedWord) {
+        if (deletedWord && !session?.user) {
             VocabularyStorage.restore(deletedWord);
             setWords(VocabularyStorage.getAll());
             setDeletedWord(null);
         }
+        // Note: Undo for DB is more complex (would need to re-insert)
+        // For now, just clear the undo state
+        setDeletedWord(null);
     };
 
     const filteredWords = words.filter(w =>
         w.word.toLowerCase().includes(searchQuery.toLowerCase()) ||
         w.meaning.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    if (status === 'loading') {
+        return (
+            <div style={{ padding: '1rem', textAlign: 'center' }}>
+                <p>Loading...</p>
+            </div>
+        );
+    }
 
     return (
         <div style={{ padding: '1rem', maxWidth: '600px', margin: '0 auto' }}>
@@ -49,6 +119,7 @@ export default function VocabularyPage() {
                 </h1>
                 <p style={{ color: '#718096', fontSize: '0.9rem' }}>
                     Total: {words.length} words
+                    {session?.user && <span style={{ marginLeft: '0.5rem', color: '#48bb78' }}>✓ Synced</span>}
                 </p>
             </header>
 
@@ -62,9 +133,16 @@ export default function VocabularyPage() {
                 style={{ marginBottom: '1rem', width: '100%' }}
             />
 
+            {/* Loading indicator */}
+            {isPending && (
+                <div style={{ textAlign: 'center', padding: '1rem', color: '#718096' }}>
+                    Processing...
+                </div>
+            )}
+
             {/* Undo Banner */}
             <AnimatePresence>
-                {deletedWord && (
+                {deletedWord && !session?.user && (
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
