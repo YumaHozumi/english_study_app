@@ -1,4 +1,4 @@
-import type { SearchResult } from "../types";
+import type { SearchResult, SearchResponse } from "../types";
 
 export class LLMService {
     private apiUrl: string;
@@ -8,7 +8,7 @@ export class LLMService {
         this.apiUrl = '/api';
     }
 
-    async searchWord(query: string): Promise<SearchResult[]> {
+    async searchWord(query: string): Promise<SearchResponse> {
         try {
             const response = await fetch(`${this.apiUrl}/search`, {
                 method: 'POST',
@@ -25,8 +25,8 @@ export class LLMService {
 
             const data = await response.json();
 
-            // Backend returns { results: [...] }
-            return data.results.map((item: {
+            // Parse results
+            const results: SearchResult[] = data.results.map((item: {
                 word: string;
                 phonetic: string;
                 meaning: string;
@@ -39,6 +39,12 @@ export class LLMService {
                 example: item.example,
                 exampleJp: item.exampleJp
             }));
+
+            return {
+                results,
+                fullTranslation: data.fullTranslation,
+                originalText: data.originalText,
+            };
         } catch (error) {
             console.error("API Error:", error);
             throw new Error(error instanceof Error ? error.message : "Failed to search word");
