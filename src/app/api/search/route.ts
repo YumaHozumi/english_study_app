@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { searchCache } from '@/lib/cache';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -25,6 +26,12 @@ export async function POST(request: NextRequest) {
                 { detail: 'Query cannot be empty' },
                 { status: 400 }
             );
+        }
+
+        // キャッシュチェック
+        const cached = await searchCache.get(query);
+        if (cached) {
+            return NextResponse.json(cached);
         }
 
         const modelName = process.env.MODEL_NAME || 'gemini-2.0-flash-exp';
@@ -117,6 +124,9 @@ Do not include any markdown formatting like \`\`\`json. Just the raw JSON object
             responseData.fullTranslation = data.full_translation;
             responseData.originalText = query;
         }
+
+        // キャッシュに保存
+        await searchCache.set(query, responseData);
 
         return NextResponse.json(responseData);
 
