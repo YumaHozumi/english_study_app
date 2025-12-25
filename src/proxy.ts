@@ -5,10 +5,10 @@ import { Redis } from '@upstash/redis';
 // Upstash Redis クライアント
 const redis = Redis.fromEnv();
 
-// レートリミッター: 1分間に20リクエストまで
+// レートリミッター: 1分間に10リクエストまで
 const ratelimit = new Ratelimit({
     redis: redis,
-    limiter: Ratelimit.slidingWindow(20, '1 m'),
+    limiter: Ratelimit.slidingWindow(10, '1 m'),
     analytics: true,
 });
 
