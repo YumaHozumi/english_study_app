@@ -11,6 +11,11 @@ interface SearchResultItem {
     example_jp: string;
 }
 
+interface LLMResponse {
+    words: SearchResultItem[];
+    full_translation?: string;
+}
+
 export async function POST(request: NextRequest) {
     try {
         const { query } = await request.json();
@@ -25,24 +30,51 @@ export async function POST(request: NextRequest) {
         const modelName = process.env.MODEL_NAME || 'gemini-2.0-flash-exp';
         const model = genAI.getGenerativeModel({ model: modelName });
 
-        const prompt = `You are an English teacher. The user has provided the following input: "${query}".
+        // Check if input is a sentence (3+ words)
+        const wordCount = query.trim().split(/\s+/).length;
+        const isSentence = wordCount >= 3;
+
+        const prompt = isSentence
+            ? `You are an English teacher. The user has provided the following sentence/paragraph: "${query}".
 
 INSTRUCTIONS:
-1. If the input is a **single word/phrase**, define it directly.
-2. If the input is a **sentence or paragraph**, identify 1 to 3 most difficult/important keywords (vocabulary) from it.
+1. Provide a full Japanese translation of the entire input.
+2. Identify 1 to 3 most difficult/important keywords (vocabulary) from the input.
 
-For each item, provide the details in a STRICT JSON ARRAY format:
-[
-  {
-    "word": "The word/phrase",
-    "phonetic": "IPA pronunciation",
-    "meaning": "Clear definition in JAPANESE (日本語)",
-    "example": "If input was a long text, USE THE INPUT SENTENCE HERE (highlighting the word if possible). If input was a single word, create a new example.",
-    "example_jp": "Japanese translation of the example"
-  }
-]
+Return your response in this STRICT JSON format:
+{
+  "full_translation": "Full Japanese translation of the entire input",
+  "words": [
+    {
+      "word": "The word/phrase",
+      "phonetic": "IPA pronunciation",
+      "meaning": "Clear definition in JAPANESE (日本語)",
+      "example": "Use the original input sentence as the example",
+      "example_jp": "Japanese translation of the example"
+    }
+  ]
+}
 
-Do not include any markdown formatting like \`\`\`json. Just the raw JSON array.`;
+Do not include any markdown formatting like \`\`\`json. Just the raw JSON object.`
+            : `You are an English teacher. The user has provided the following word/phrase: "${query}".
+
+INSTRUCTIONS:
+Define this word/phrase with the following details.
+
+Return your response in this STRICT JSON format:
+{
+  "words": [
+    {
+      "word": "The word/phrase",
+      "phonetic": "IPA pronunciation",
+      "meaning": "Clear definition in JAPANESE (日本語)",
+      "example": "A simple, memorable example sentence",
+      "example_jp": "Japanese translation of the example"
+    }
+  ]
+}
+
+Do not include any markdown formatting like \`\`\`json. Just the raw JSON object.`;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
@@ -52,7 +84,7 @@ Do not include any markdown formatting like \`\`\`json. Just the raw JSON array.
         const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
 
         // Parse JSON
-        let data: SearchResultItem[];
+        let data: LLMResponse;
         try {
             data = JSON.parse(cleanText);
         } catch {
@@ -62,11 +94,11 @@ Do not include any markdown formatting like \`\`\`json. Just the raw JSON array.
             );
         }
 
-        // Ensure array format
-        const resultsArray = Array.isArray(data) ? data : [data];
+        // Ensure words is an array
+        const wordsArray = Array.isArray(data.words) ? data.words : [data.words];
 
         // Convert to response format (example_jp -> exampleJp)
-        const results = resultsArray.map((item: SearchResultItem) => ({
+        const results = wordsArray.map((item: SearchResultItem) => ({
             word: item.word,
             phonetic: item.phonetic,
             meaning: item.meaning,
@@ -74,7 +106,19 @@ Do not include any markdown formatting like \`\`\`json. Just the raw JSON array.
             exampleJp: item.example_jp
         }));
 
-        return NextResponse.json({ results });
+        // Build response with optional fullTranslation
+        const responseData: {
+            results: typeof results;
+            fullTranslation?: string;
+            originalText?: string;
+        } = { results };
+
+        if (isSentence && data.full_translation) {
+            responseData.fullTranslation = data.full_translation;
+            responseData.originalText = query;
+        }
+
+        return NextResponse.json(responseData);
 
     } catch (error) {
         console.error('API Error:', error);
