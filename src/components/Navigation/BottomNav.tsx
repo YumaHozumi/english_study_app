@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Search, BookOpen, GraduationCap, Settings } from 'lucide-react';
 
 const navItems = [
@@ -13,6 +13,11 @@ const navItems = [
 
 export const BottomNav = () => {
     const pathname = usePathname();
+    const router = useRouter();
+
+    const handlePrefetch = (path: string) => {
+        router.prefetch(path);
+    };
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 bg-[var(--nav-bg)] backdrop-blur-md border-t border-[var(--border-color)] py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] transition-colors duration-300">
@@ -23,9 +28,11 @@ export const BottomNav = () => {
                         <Link
                             key={path}
                             href={path}
+                            onMouseEnter={() => handlePrefetch(path)}
+                            onTouchStart={() => handlePrefetch(path)}
                             className={`flex flex-col items-center gap-1 px-4 py-2 no-underline text-xs transition-colors duration-200 ${isActive
-                                    ? 'text-[var(--primary-color)] font-semibold'
-                                    : 'text-[var(--text-secondary)] font-normal'
+                                ? 'text-[var(--primary-color)] font-semibold'
+                                : 'text-[var(--text-secondary)] font-normal'
                                 }`}
                         >
                             <Icon size={22} />
@@ -37,3 +44,4 @@ export const BottomNav = () => {
         </nav>
     );
 };
+
