@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { SearchResult } from '../../types';
 import { SwipeableCard } from './SwipeableCard';
 import { AnimatePresence } from 'framer-motion';
@@ -8,15 +8,23 @@ interface FlashcardStackProps {
     results: SearchResult[];
     onSave: (result: SearchResult) => void;
     onDiscard?: (result: SearchResult) => void;
+    onComplete?: () => void;
 }
 
-export const FlashcardStack = ({ results, onSave, onDiscard }: FlashcardStackProps) => {
+export const FlashcardStack = ({ results, onSave, onDiscard, onComplete }: FlashcardStackProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [history, setHistory] = useState<number[]>([]);
     const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
 
     const activeResult = results[currentIndex];
     const nextResult = results[currentIndex + 1];
+
+    // Call onComplete when all cards are reviewed
+    useEffect(() => {
+        if (!activeResult && currentIndex > 0 && onComplete) {
+            onComplete();
+        }
+    }, [activeResult, currentIndex, onComplete]);
 
     const handleSwipe = (direction: 'left' | 'right') => {
         setSwipeDirection(direction);

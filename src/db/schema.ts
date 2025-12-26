@@ -74,9 +74,33 @@ export const vocabularyEntries = sqliteTable('vocabulary_entry', {
     createdAt: integer('created_at', { mode: 'timestamp_ms' }).default(
         sql`(unixepoch() * 1000)`
     ),
+    // SRS (Spaced Repetition System) fields
+    srsLevel: integer('srs_level').default(0),
+    nextReviewAt: integer('next_review_at', { mode: 'number' }),
+    lastReviewedAt: integer('last_reviewed_at', { mode: 'number' }),
+    reviewCount: integer('review_count').default(0),
+    isMastered: integer('is_mastered', { mode: 'boolean' }).default(false),
+});
+
+// Push notification subscriptions
+export const pushSubscriptions = sqliteTable('push_subscription', {
+    id: text('id')
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    userId: text('user_id')
+        .notNull()
+        .references(() => users.id, { onDelete: 'cascade' }),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).default(
+        sql`(unixepoch() * 1000)`
+    ),
 });
 
 // Type exports
 export type User = typeof users.$inferSelect;
 export type VocabularyEntry = typeof vocabularyEntries.$inferSelect;
 export type NewVocabularyEntry = typeof vocabularyEntries.$inferInsert;
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+
