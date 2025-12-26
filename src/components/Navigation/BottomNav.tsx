@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, BookOpen, GraduationCap, Settings } from 'lucide-react';
+import { Search, BookOpen, GraduationCap, Settings, BarChart3 } from 'lucide-react';
 
 const navItems = [
     { path: '/search', icon: Search, label: 'Search' },
     { path: '/vocabulary', icon: BookOpen, label: 'Vocabulary' },
     { path: '/study', icon: GraduationCap, label: 'Study' },
+    { path: '/stats', icon: BarChart3, label: 'Stats' },
     { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
