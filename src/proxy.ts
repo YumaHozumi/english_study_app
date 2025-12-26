@@ -17,8 +17,12 @@ export async function proxy(request: NextRequest) {
     if (request.nextUrl.pathname.startsWith('/api/')) {
         const host = request.headers.get('host') || '';
 
-        // 本番環境でのオリジン検証
-        if (process.env.NODE_ENV === 'production') {
+        // 認証コールバックパスはオリジン/リファラー検証をスキップ
+        // (OAuth プロバイダーからのリダイレクトは外部リファラーを持つため)
+        const isAuthCallback = request.nextUrl.pathname.startsWith('/api/auth/');
+
+        // 本番環境でのオリジン検証（認証コールバック以外）
+        if (process.env.NODE_ENV === 'production' && !isAuthCallback) {
             const origin = request.headers.get('origin');
             const referer = request.headers.get('referer');
 
