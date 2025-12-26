@@ -189,19 +189,19 @@ export default function VocabularyPage() {
                             whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0,0,0,0.12)' }}
                             whileTap={{ scale: 0.98 }}
                         >
-                            <div className="flex-1">
-                                <h3 className="text-lg mb-1 text-[var(--text-color)]">
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-lg mb-1 text-[var(--text-color)] truncate">
                                     {entry.word}
                                 </h3>
-                                <p className="text-sm text-[var(--text-secondary)] mb-2">
+                                <p className="text-sm text-[var(--text-secondary)] mb-2 truncate">
                                     {entry.phonetic}
                                 </p>
-                                <p className="text-sm text-[var(--text-color)] overflow-hidden text-ellipsis whitespace-nowrap max-w-[280px]">
+                                <p className="text-sm text-[var(--text-color)] truncate">
                                     {entry.meaning}
                                 </p>
                             </div>
-                            <div className="flex gap-2 items-center">
-                                <span className="text-xs text-gray-400">
+                            <div className="flex gap-2 items-center flex-shrink-0 ml-2">
+                                <span className="text-xs text-gray-400 whitespace-nowrap">
                                     {new Date(entry.timestamp).toLocaleDateString()}
                                 </span>
                                 <button
