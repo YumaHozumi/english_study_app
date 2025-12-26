@@ -4,11 +4,13 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/components/AuthProvider';
 import { BottomNav } from '@/components/Navigation/BottomNav';
 import { HeaderUserButton } from '@/components/HeaderUserButton';
+import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <AuthProvider>
             <ThemeProvider>
+                <ServiceWorkerRegistration />
                 <div className="app-container pb-20">
                     <header className="mb-6 flex justify-between items-center px-4">
                         <div className="text-left">
@@ -24,3 +26,4 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </AuthProvider>
     );
 }
+

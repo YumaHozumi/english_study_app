@@ -1,10 +1,25 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { LogIn, LogOut, User, Trash2, AlertTriangle } from 'lucide-react';
+import { LogIn, LogOut, User, Trash2, AlertTriangle, Bell, BellOff } from 'lucide-react';
 import { deleteAccount } from '@/actions/account';
+import { savePushSubscription, deletePushSubscription, hasPushSubscription } from '@/actions/notification';
+
+// VAPID public key - should be set in environment variable
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+
+function urlBase64ToUint8Array(base64String: string): BufferSource {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray as BufferSource;
+}
 
 export default function SettingsPage() {
     const { theme, toggleTheme } = useTheme();
@@ -13,6 +28,92 @@ export default function SettingsPage() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [isPending, startTransition] = useTransition();
+
+    // Notification state
+    const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>('default');
+    const [isSubscribed, setIsSubscribed] = useState(false);
+    const [isNotificationLoading, setIsNotificationLoading] = useState(false);
+
+    // Check notification permission and subscription status on mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+                setNotificationPermission('unsupported');
+                return;
+            }
+            setNotificationPermission(Notification.permission);
+        }
+    }, []);
+
+    // Check if user has subscription in DB
+    useEffect(() => {
+        if (session?.user) {
+            hasPushSubscription().then(setIsSubscribed);
+        }
+    }, [session]);
+
+    const handleEnableNotifications = async () => {
+        if (!session?.user) return;
+        setIsNotificationLoading(true);
+
+        try {
+            // Request notification permission
+            const permission = await Notification.requestPermission();
+            setNotificationPermission(permission);
+
+            if (permission !== 'granted') {
+                setIsNotificationLoading(false);
+                return;
+            }
+
+            // Get service worker registration
+            const registration = await navigator.serviceWorker.ready;
+
+            // Subscribe to push notifications
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+            });
+
+            // Save subscription to database
+            const subscriptionJson = subscription.toJSON();
+            await savePushSubscription({
+                endpoint: subscriptionJson.endpoint!,
+                keys: {
+                    p256dh: subscriptionJson.keys!.p256dh!,
+                    auth: subscriptionJson.keys!.auth!,
+                },
+            });
+
+            setIsSubscribed(true);
+        } catch (error) {
+            console.error('Failed to enable notifications:', error);
+        } finally {
+            setIsNotificationLoading(false);
+        }
+    };
+
+    const handleDisableNotifications = async () => {
+        if (!session?.user) return;
+        setIsNotificationLoading(true);
+
+        try {
+            // Unsubscribe from push manager
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+            if (subscription) {
+                await subscription.unsubscribe();
+            }
+
+            // Remove from database
+            await deletePushSubscription();
+            setIsSubscribed(false);
+        } catch (error) {
+            console.error('Failed to disable notifications:', error);
+        } finally {
+            setIsNotificationLoading(false);
+        }
+    };
 
     const handleDeleteAccount = () => {
         if (deleteConfirmText !== 'delete') return;
@@ -93,6 +194,80 @@ export default function SettingsPage() {
                     </div>
                 )}
             </div>
+
+            {/* Notifications Section */}
+            {session?.user && notificationPermission !== 'unsupported' && (
+                <div className="bg-[var(--card-bg)] p-5 rounded-xl shadow-md mb-4">
+                    <h2 className="text-sm text-[var(--text-secondary)] mb-4 uppercase tracking-wide">
+                        Notifications
+                    </h2>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h3 className="text-base mb-1 text-[var(--text-color)]">
+                                復習リマインダー
+                            </h3>
+                            <p className="text-sm text-[var(--text-secondary)] m-0">
+                                {isSubscribed
+                                    ? '毎日の復習時間に通知を受け取ります'
+                                    : '復習すべき単語がある時に通知します'}
+                            </p>
+                        </div>
+                        <button
+                            onClick={isSubscribed ? handleDisableNotifications : handleEnableNotifications}
+                            disabled={isNotificationLoading || !VAPID_PUBLIC_KEY}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer text-sm transition-colors ${isSubscribed
+                                ? 'bg-green-500/10 text-green-500 border border-green-500/30'
+                                : 'bg-[var(--primary-color)] text-white border-none'
+                                } ${isNotificationLoading || !VAPID_PUBLIC_KEY ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            {isNotificationLoading ? (
+                                'Loading...'
+                            ) : isSubscribed ? (
+                                <>
+                                    <Bell size={16} />
+                                    ON
+                                </>
+                            ) : (
+                                <>
+                                    <BellOff size={16} />
+                                    OFF
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    {notificationPermission === 'denied' && (
+                        <p className="text-xs text-red-500 mt-2">
+                            ブラウザの通知がブロックされています。ブラウザの設定から許可してください。
+                        </p>
+                    )}
+                    {!VAPID_PUBLIC_KEY && (
+                        <p className="text-xs text-yellow-500 mt-2">
+                            通知機能の設定中です。しばらくお待ちください。
+                        </p>
+                    )}
+                    {/* Test Notification Button */}
+                    {isSubscribed && VAPID_PUBLIC_KEY && (
+                        <button
+                            onClick={async () => {
+                                try {
+                                    const res = await fetch('/api/test-notification', { method: 'POST' });
+                                    if (res.ok) {
+                                        alert('テスト通知を送信しました！');
+                                    } else {
+                                        const data = await res.json();
+                                        alert(`エラー: ${data.error}`);
+                                    }
+                                } catch (error) {
+                                    alert('通知の送信に失敗しました');
+                                }
+                            }}
+                            className="mt-4 w-full px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg cursor-pointer text-sm hover:bg-[var(--bg-tertiary)] transition-colors"
+                        >
+                            🧪 テスト通知を送信
+                        </button>
+                    )}
+                </div>
+            )}
 
             {/* Appearance Section */}
             <div className="bg-[var(--card-bg)] p-5 rounded-xl shadow-md">
@@ -203,8 +378,8 @@ export default function SettingsPage() {
                                 onClick={handleDeleteAccount}
                                 disabled={deleteConfirmText !== 'delete' || isPending}
                                 className={`flex-1 py-3 border-none rounded-lg text-white text-sm font-medium ${deleteConfirmText === 'delete'
-                                        ? 'bg-red-500 cursor-pointer'
-                                        : 'bg-gray-400 cursor-not-allowed'
+                                    ? 'bg-red-500 cursor-pointer'
+                                    : 'bg-gray-400 cursor-not-allowed'
                                     }`}
                             >
                                 {isPending ? 'Deleting...' : 'Delete Account'}
