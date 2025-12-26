@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
-import { users, accounts, sessions, vocabularyEntries } from '@/db/schema';
+import { users, accounts, sessions, vocabularyEntries, pushSubscriptions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function deleteAccount() {
@@ -17,13 +17,16 @@ export async function deleteAccount() {
     // 1. Delete vocabulary entries
     await db.delete(vocabularyEntries).where(eq(vocabularyEntries.userId, userId));
 
-    // 2. Delete sessions
+    // 2. Delete push subscriptions
+    await db.delete(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+
+    // 3. Delete sessions
     await db.delete(sessions).where(eq(sessions.userId, userId));
 
-    // 3. Delete accounts (OAuth connections)
+    // 4. Delete accounts (OAuth connections)
     await db.delete(accounts).where(eq(accounts.userId, userId));
 
-    // 4. Delete user
+    // 5. Delete user
     await db.delete(users).where(eq(users.id, userId));
 
     return { success: true };
