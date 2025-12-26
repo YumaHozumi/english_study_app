@@ -245,27 +245,6 @@ export default function SettingsPage() {
                             通知機能の設定中です。しばらくお待ちください。
                         </p>
                     )}
-                    {/* Test Notification Button */}
-                    {isSubscribed && VAPID_PUBLIC_KEY && (
-                        <button
-                            onClick={async () => {
-                                try {
-                                    const res = await fetch('/api/test-notification', { method: 'POST' });
-                                    if (res.ok) {
-                                        alert('テスト通知を送信しました！');
-                                    } else {
-                                        const data = await res.json();
-                                        alert(`エラー: ${data.error}`);
-                                    }
-                                } catch (error) {
-                                    alert('通知の送信に失敗しました');
-                                }
-                            }}
-                            className="mt-4 w-full px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg cursor-pointer text-sm hover:bg-[var(--bg-tertiary)] transition-colors"
-                        >
-                            🧪 テスト通知を送信
-                        </button>
-                    )}
                 </div>
             )}
 
