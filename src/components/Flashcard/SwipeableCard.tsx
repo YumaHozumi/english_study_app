@@ -27,20 +27,9 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
     const RightIcon = swipeConfig.rightIcon;
     const LeftIcon = swipeConfig.leftIcon;
 
-    const background = useTransform(
-        x,
-        [-200, -100, 0, 100, 200],
-        [
-            `${swipeConfig.leftColor}33`,  // 20% opacity
-            `${swipeConfig.leftColor}1a`,  // 10% opacity
-            'rgba(255, 255, 255, 1)',
-            `${swipeConfig.rightColor}1a`, // 10% opacity
-            `${swipeConfig.rightColor}33`  // 20% opacity
-        ]
-    );
-
-    const rightIconOpacity = useTransform(x, [50, 150], [0, 1]);
-    const leftIconOpacity = useTransform(x, [-150, -50], [1, 0]);
+    // アイコン/ラベル: 30px～50pxで素早くフェードイン
+    const rightIconOpacity = useTransform(x, [30, 50], [0, 1]);
+    const leftIconOpacity = useTransform(x, [-50, -30], [1, 0]);
 
     const handleDragEnd = (_: unknown, info: PanInfo) => {
         const threshold = 100;
@@ -53,12 +42,11 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
 
     return (
         <motion.div
+            className="bg-[var(--card-bg)]"
             style={{
                 width: '100%',
                 maxWidth: '400px',
                 height: '500px',
-                backgroundColor: '#fff',
-                background: background as unknown as string,
                 borderRadius: '20px',
                 boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
                 position: 'absolute',
@@ -112,22 +100,22 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
             </motion.div>
 
             <div className="text-center w-full">
-                <h2 className="text-4xl mb-2 text-gray-800">{data.word}</h2>
-                <p className="text-xl text-gray-500 mb-8 italic">{data.phonetic}</p>
+                <h2 className="text-4xl mb-2 text-[var(--text-primary)]">{data.word}</h2>
+                <p className="text-xl text-[var(--text-secondary)] mb-8 italic">{data.phonetic}</p>
 
                 <div className="text-left w-full mb-6">
-                    <h3 className="text-sm uppercase text-gray-400 mb-2 tracking-wide">Meaning</h3>
-                    <p className="text-lg text-gray-600 leading-relaxed">{data.meaning}</p>
+                    <h3 className="text-sm uppercase text-[var(--text-tertiary)] mb-2 tracking-wide">Meaning</h3>
+                    <p className="text-lg text-[var(--text-primary)] leading-relaxed">{data.meaning}</p>
                 </div>
 
                 <div className="text-left w-full flex-1">
-                    <h3 className="text-sm uppercase text-gray-400 mb-2 tracking-wide">Example</h3>
-                    <p className="text-base text-gray-600 mb-2">{data.example}</p>
-                    <p className="text-sm text-gray-500">{data.exampleJp}</p>
+                    <h3 className="text-sm uppercase text-[var(--text-tertiary)] mb-2 tracking-wide">Example</h3>
+                    <p className="text-base text-[var(--text-primary)] mb-2">{data.example}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">{data.exampleJp}</p>
                 </div>
             </div>
 
-            <div className="text-xs text-gray-400 mt-4 flex items-center justify-center gap-3">
+            <div className="text-xs text-[var(--text-tertiary)] mt-4 flex items-center justify-center gap-3">
                 <span>← {swipeConfig.leftLabel}</span>
                 <span>•</span>
                 <span>{swipeConfig.rightLabel} →</span>

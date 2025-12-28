@@ -79,10 +79,10 @@ export const FlashcardStack = ({ results, onSave, onDiscard, onComplete, swipeCo
                 {nextResult && (
                     <div
                         key={`next-${currentIndex + 1}`}
-                        className="absolute top-0 left-0 right-0 mx-auto w-full max-w-[400px] h-[500px] bg-gray-100 rounded-2xl border border-gray-200 scale-95 translate-y-2.5 z-0"
+                        className="absolute top-0 left-0 right-0 mx-auto w-full max-w-[400px] h-[500px] bg-[var(--card-bg)] rounded-2xl border border-[var(--border-color)] scale-95 translate-y-2.5 z-0"
                     >
                         <div className="p-8 opacity-50 blur-[1px]">
-                            <h2 className="text-3xl text-center">{nextResult.word}</h2>
+                            <h2 className="text-3xl text-center text-[var(--text-primary)]">{nextResult.word}</h2>
                         </div>
                     </div>
                 )}
