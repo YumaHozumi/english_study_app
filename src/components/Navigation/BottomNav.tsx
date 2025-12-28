@@ -21,7 +21,7 @@ export const BottomNav = () => {
     };
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-[var(--nav-bg)] backdrop-blur-md border-t border-[var(--border-color)] py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] transition-colors duration-300">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--nav-bg)] backdrop-blur-md border-t border-[var(--border-color)] py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] transition-colors duration-300">
             <div className="flex justify-around max-w-[600px] mx-auto">
                 {navItems.map(({ path, icon: Icon, label }) => {
                     const isActive = pathname === path;

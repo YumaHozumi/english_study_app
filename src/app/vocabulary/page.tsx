@@ -229,7 +229,7 @@ export default function VocabularyPage() {
             {words.length > 0 && (
                 <button
                     onClick={() => router.push('/study')}
-                    className="w-full mt-8 p-4 text-base font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-none rounded-xl cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full mt-8 mb-8 p-4 text-base font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-none rounded-xl cursor-pointer flex items-center justify-center gap-2"
                 >
                     <BookOpen size={20} /> Start Study Mode
                 </button>

@@ -71,5 +71,5 @@
 }
 
 .app-container {
-  @apply max-w-[600px] mx-auto px-8 py-8 min-h-screen;
+  @apply max-w-[600px] mx-auto px-8 py-8 pb-32 min-h-screen;
 }
