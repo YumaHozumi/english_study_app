@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import type { SearchResult } from '../../types';
 import type { LucideIcon } from 'lucide-react';
 
@@ -32,11 +32,14 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
     const leftIconOpacity = useTransform(x, [-50, -30], [1, 0]);
 
     const handleDragEnd = (_: unknown, info: PanInfo) => {
-        const threshold = 100;
-        if (info.offset.x > threshold) {
+        const THRESHOLD = 200;
+        if (info.offset.x > THRESHOLD) {
             onSwipe('right');
-        } else if (info.offset.x < -threshold) {
+        } else if (info.offset.x < -THRESHOLD) {
             onSwipe('left');
+        } else {
+            // 閾値未満: スプリングアニメーションで元の位置に戻す
+            animate(x, 0, { type: 'spring', stiffness: 300, damping: 20 });
         }
     };
 
