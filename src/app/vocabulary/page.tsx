@@ -146,6 +146,16 @@ export default function VocabularyPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
             />
 
+            {/* Study Mode Button */}
+            {words.length > 0 && (
+                <button
+                    onClick={() => router.push('/study')}
+                    className="w-full mb-4 p-4 text-base font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-none rounded-xl cursor-pointer flex items-center justify-center gap-2"
+                >
+                    <BookOpen size={20} /> Start Study Mode
+                </button>
+            )}
+
             {/* Loading indicator */}
             {isPending && (
                 <div className="text-center p-4 text-[var(--text-secondary)]">
@@ -225,15 +235,7 @@ export default function VocabularyPage() {
                 </div>
             )}
 
-            {/* Study Mode Button */}
-            {words.length > 0 && (
-                <button
-                    onClick={() => router.push('/study')}
-                    className="w-full mt-8 mb-8 p-4 text-base font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-none rounded-xl cursor-pointer flex items-center justify-center gap-2"
-                >
-                    <BookOpen size={20} /> Start Study Mode
-                </button>
-            )}
+
 
             {/* Word Detail Modal */}
             <AnimatePresence>
