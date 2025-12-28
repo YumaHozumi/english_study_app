@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { SearchResult } from '../../types';
-import { SwipeableCard } from './SwipeableCard';
+import { SwipeableCard, type SwipeConfig } from './SwipeableCard';
 import { AnimatePresence } from 'framer-motion';
 import { RotateCcw } from 'lucide-react';
 
@@ -9,9 +9,10 @@ interface FlashcardStackProps {
     onSave: (result: SearchResult) => void;
     onDiscard?: (result: SearchResult) => void;
     onComplete?: () => void;
+    swipeConfig: SwipeConfig;
 }
 
-export const FlashcardStack = ({ results, onSave, onDiscard, onComplete }: FlashcardStackProps) => {
+export const FlashcardStack = ({ results, onSave, onDiscard, onComplete, swipeConfig }: FlashcardStackProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [history, setHistory] = useState<number[]>([]);
     const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
@@ -93,6 +94,7 @@ export const FlashcardStack = ({ results, onSave, onDiscard, onComplete }: Flash
                         data={activeResult}
                         onSwipe={handleSwipe}
                         swipeDirection={swipeDirection}
+                        swipeConfig={swipeConfig}
                         style={{ zIndex: 1 }}
                     />
                 </AnimatePresence>

@@ -1,33 +1,46 @@
 import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion';
 import type { SearchResult } from '../../types';
-import { X, Check } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
+export interface SwipeConfig {
+    rightIcon: LucideIcon;
+    rightLabel: string;
+    rightColor: string;
+    leftIcon: LucideIcon;
+    leftLabel: string;
+    leftColor: string;
+}
 
 interface SwipeableCardProps {
     data: SearchResult;
     onSwipe: (direction: 'left' | 'right') => void;
     swipeDirection: 'left' | 'right' | null;
+    swipeConfig: SwipeConfig;
     style?: React.CSSProperties;
 }
 
-export const SwipeableCard = ({ data, onSwipe, swipeDirection, style }: SwipeableCardProps) => {
+export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, style }: SwipeableCardProps) => {
     const x = useMotionValue(0);
     const rotate = useTransform(x, [-200, 200], [-25, 25]);
     const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+
+    const RightIcon = swipeConfig.rightIcon;
+    const LeftIcon = swipeConfig.leftIcon;
 
     const background = useTransform(
         x,
         [-200, -100, 0, 100, 200],
         [
-            'rgba(255, 80, 80, 0.2)',
-            'rgba(255, 80, 80, 0.1)',
+            `${swipeConfig.leftColor}33`,  // 20% opacity
+            `${swipeConfig.leftColor}1a`,  // 10% opacity
             'rgba(255, 255, 255, 1)',
-            'rgba(80, 255, 80, 0.1)',
-            'rgba(80, 255, 80, 0.2)'
+            `${swipeConfig.rightColor}1a`, // 10% opacity
+            `${swipeConfig.rightColor}33`  // 20% opacity
         ]
     );
 
-    const checkOpacity = useTransform(x, [50, 150], [0, 1]);
-    const crossOpacity = useTransform(x, [-150, -50], [1, 0]);
+    const rightIconOpacity = useTransform(x, [50, 150], [0, 1]);
+    const leftIconOpacity = useTransform(x, [-150, -50], [1, 0]);
 
     const handleDragEnd = (_: unknown, info: PanInfo) => {
         const threshold = 100;
@@ -82,12 +95,20 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, style }: Swipeabl
                 }
             }}
         >
-            {/* Overlay Icons */}
-            <motion.div className="absolute top-10 right-10 text-green-500" style={{ opacity: checkOpacity }}>
-                <Check size={64} strokeWidth={3} />
+            {/* Overlay Icons with Labels */}
+            <motion.div
+                className="absolute top-10 right-10 flex flex-col items-center gap-1"
+                style={{ opacity: rightIconOpacity, color: swipeConfig.rightColor }}
+            >
+                <RightIcon size={48} strokeWidth={3} />
+                <span className="text-sm font-medium">{swipeConfig.rightLabel}</span>
             </motion.div>
-            <motion.div className="absolute top-10 left-10 text-red-500" style={{ opacity: crossOpacity }}>
-                <X size={64} strokeWidth={3} />
+            <motion.div
+                className="absolute top-10 left-10 flex flex-col items-center gap-1"
+                style={{ opacity: leftIconOpacity, color: swipeConfig.leftColor }}
+            >
+                <LeftIcon size={48} strokeWidth={3} />
+                <span className="text-sm font-medium">{swipeConfig.leftLabel}</span>
             </motion.div>
 
             <div className="text-center w-full">
@@ -106,8 +127,10 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, style }: Swipeabl
                 </div>
             </div>
 
-            <div className="text-xs text-gray-300 mt-4">
-                Swipe Right to Save • Left to Discard
+            <div className="text-xs text-gray-400 mt-4 flex items-center justify-center gap-3">
+                <span>← {swipeConfig.leftLabel}</span>
+                <span>•</span>
+                <span>{swipeConfig.rightLabel} →</span>
             </div>
         </motion.div>
     );

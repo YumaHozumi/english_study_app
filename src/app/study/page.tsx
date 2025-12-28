@@ -12,8 +12,19 @@ import {
 } from '@/actions/vocabulary';
 import type { WordEntry, SearchResult } from '@/types';
 import { FlashcardStack } from '@/components/Flashcard/FlashcardStack';
-import { ArrowLeft, Calendar, BookOpen, CheckCircle, PartyPopper, Search } from 'lucide-react';
+import { ArrowLeft, Calendar, BookOpen, CheckCircle, PartyPopper, Search, Check, RotateCcw } from 'lucide-react';
 import { getSrsLevelLabel } from '@/lib/srs';
+import type { SwipeConfig } from '@/components/Flashcard/SwipeableCard';
+
+// Study画面用のスワイプ設定
+const studySwipeConfig: SwipeConfig = {
+    rightIcon: Check,
+    rightLabel: '覚えた',
+    rightColor: '#22c55e',  // green-500
+    leftIcon: RotateCcw,
+    leftLabel: '忘れた',
+    leftColor: '#f97316',   // orange-500
+};
 
 // Study mode types
 type StudyMode = 'today' | 'all' | 'mastered';
@@ -307,6 +318,7 @@ export default function StudyPage() {
                     }
                 }}
                 onComplete={() => setReviewCompleted(true)}
+                swipeConfig={studySwipeConfig}
             />
         </div>
     );

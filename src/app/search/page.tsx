@@ -12,6 +12,18 @@ import { VocabularyStorage } from '@/services/vocabulary';
 import { saveVocabularyEntry } from '@/actions/vocabulary';
 import type { SearchResult } from '@/types';
 import { AnimatePresence } from 'framer-motion';
+import { Plus, Trash2 } from 'lucide-react';
+import type { SwipeConfig } from '@/components/Flashcard/SwipeableCard';
+
+// Search画面用のスワイプ設定
+const searchSwipeConfig: SwipeConfig = {
+    rightIcon: Plus,
+    rightLabel: '追加',
+    rightColor: '#3b82f6',  // blue-500
+    leftIcon: Trash2,
+    leftLabel: 'スキップ',
+    leftColor: '#6b7280',   // gray-500
+};
 
 export default function SearchPage() {
     const { data: session } = useSession();
@@ -88,6 +100,7 @@ export default function SearchPage() {
                         onDiscard={(result) => {
                             console.log('Discarded:', result.word);
                         }}
+                        swipeConfig={searchSwipeConfig}
                     />
                 )}
             </div>
