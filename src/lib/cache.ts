@@ -38,6 +38,12 @@ export const searchCache = {
      * キャッシュから検索結果を取得
      */
     async get(query: string): Promise<CachedSearchResult | null> {
+        // モックモード時はキャッシュを無効化
+        if (process.env.USE_MOCK_LLM === 'true') {
+            console.log('Cache: Disabled in mock mode');
+            return null;
+        }
+
         if (!redis) {
             console.log('Cache: Redis not configured, skipping');
             return null;
@@ -62,6 +68,11 @@ export const searchCache = {
      * 検索結果をキャッシュに保存
      */
     async set(query: string, result: CachedSearchResult): Promise<void> {
+        // モックモード時はキャッシュを無効化
+        if (process.env.USE_MOCK_LLM === 'true') {
+            return;
+        }
+
         if (!redis) {
             return;
         }
