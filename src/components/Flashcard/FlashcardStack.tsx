@@ -60,9 +60,9 @@ export const FlashcardStack = ({ results, onSave, onDiscard, onComplete, swipeCo
     }
 
     return (
-        <div className="relative w-full max-w-[400px] h-[600px] mx-auto">
+        <div className="relative w-full max-w-[400px] mx-auto">
             {/* Undo Button */}
-            <div className="absolute -top-12 w-full flex justify-end pr-4 z-10">
+            <div className="w-full flex justify-end pr-4 mb-4">
                 {history.length > 0 && (
                     <button
                         onClick={handleUndo}
@@ -74,31 +74,16 @@ export const FlashcardStack = ({ results, onSave, onDiscard, onComplete, swipeCo
                 )}
             </div>
 
-            <div className="relative w-full h-full">
-                {/* Background Card */}
-                {nextResult && (
-                    <div
-                        key={`next-${currentIndex + 1}`}
-                        className="absolute top-0 left-0 right-0 mx-auto w-full max-w-[400px] h-[500px] bg-[var(--card-bg)] rounded-2xl border border-[var(--border-color)] scale-95 translate-y-2.5 z-0"
-                    >
-                        <div className="p-8 opacity-50 blur-[1px]">
-                            <h2 className="text-3xl text-center text-[var(--text-primary)]">{nextResult.word}</h2>
-                        </div>
-                    </div>
-                )}
-
-                {/* Active Card */}
-                <AnimatePresence>
-                    <SwipeableCard
-                        key={currentIndex}
-                        data={activeResult}
-                        onSwipe={handleSwipe}
-                        swipeDirection={swipeDirection}
-                        swipeConfig={swipeConfig}
-                        style={{ zIndex: 1 }}
-                    />
-                </AnimatePresence>
-            </div>
+            {/* Active Card */}
+            <AnimatePresence>
+                <SwipeableCard
+                    key={currentIndex}
+                    data={activeResult}
+                    onSwipe={handleSwipe}
+                    swipeDirection={swipeDirection}
+                    swipeConfig={swipeConfig}
+                />
+            </AnimatePresence>
         </div>
     );
 };

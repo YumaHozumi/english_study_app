@@ -49,13 +49,10 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
             style={{
                 width: '100%',
                 maxWidth: '400px',
-                height: '500px',
+                minHeight: '400px',
                 borderRadius: '20px',
                 boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
+                position: 'relative',
                 marginLeft: 'auto',
                 marginRight: 'auto',
                 cursor: 'grab',
@@ -64,9 +61,10 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
                 opacity,
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
+                justifyContent: 'flex-start',
                 alignItems: 'center',
-                padding: '2rem',
+                padding: 'clamp(1rem, 4vw, 2rem)',
+                paddingTop: 'clamp(3rem, 8vh, 5rem)',
                 ...style
             }}
             drag="x"
@@ -88,14 +86,14 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
         >
             {/* Overlay Icons with Labels */}
             <motion.div
-                className="absolute top-10 right-10 flex flex-col items-center gap-1"
+                className="absolute top-6 right-6 flex flex-col items-center gap-1 sm:top-10 sm:right-10"
                 style={{ opacity: rightIconOpacity, color: swipeConfig.rightColor }}
             >
                 <RightIcon size={48} strokeWidth={3} />
                 <span className="text-sm font-medium">{swipeConfig.rightLabel}</span>
             </motion.div>
             <motion.div
-                className="absolute top-10 left-10 flex flex-col items-center gap-1"
+                className="absolute top-6 left-6 flex flex-col items-center gap-1 sm:top-10 sm:left-10"
                 style={{ opacity: leftIconOpacity, color: swipeConfig.leftColor }}
             >
                 <LeftIcon size={48} strokeWidth={3} />
@@ -103,22 +101,22 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
             </motion.div>
 
             <div className="text-center w-full">
-                <h2 className="text-4xl mb-2 text-[var(--text-primary)]">{data.word}</h2>
-                <p className="text-xl text-[var(--text-secondary)] mb-8 italic">{data.phonetic}</p>
+                <h2 className="text-3xl sm:text-4xl mb-2 text-[var(--text-primary)]">{data.word}</h2>
+                <p className="text-lg sm:text-xl text-[var(--text-secondary)] mb-6 sm:mb-8 italic">{data.phonetic}</p>
 
-                <div className="text-left w-full mb-6">
+                <div className="text-left w-full mb-4 sm:mb-6">
                     <h3 className="text-sm uppercase text-[var(--text-tertiary)] mb-2 tracking-wide">Meaning</h3>
-                    <p className="text-lg text-[var(--text-primary)] leading-relaxed">{data.meaning}</p>
+                    <p className="text-base sm:text-lg text-[var(--text-primary)] leading-relaxed break-words">{data.meaning}</p>
                 </div>
 
-                <div className="text-left w-full flex-1">
+                <div className="text-left w-full">
                     <h3 className="text-sm uppercase text-[var(--text-tertiary)] mb-2 tracking-wide">Example</h3>
-                    <p className="text-base text-[var(--text-primary)] mb-2">{data.example}</p>
-                    <p className="text-sm text-[var(--text-secondary)]">{data.exampleJp}</p>
+                    <p className="text-sm sm:text-base text-[var(--text-primary)] mb-2 break-words">{data.example}</p>
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">{data.exampleJp}</p>
                 </div>
             </div>
 
-            <div className="text-xs text-[var(--text-tertiary)] mt-4 flex items-center justify-center gap-3">
+            <div className="text-xs text-[var(--text-tertiary)] mt-auto pt-3 flex items-center justify-center gap-3 shrink-0">
                 <span>← {swipeConfig.leftLabel}</span>
                 <span>•</span>
                 <span>{swipeConfig.rightLabel} →</span>
