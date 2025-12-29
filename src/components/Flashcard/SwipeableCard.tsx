@@ -32,7 +32,7 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
     const leftIconOpacity = useTransform(x, [-50, -30], [1, 0]);
 
     const handleDragEnd = (_: unknown, info: PanInfo) => {
-        const THRESHOLD = 200;
+        const THRESHOLD = 100;
         if (info.offset.x > THRESHOLD) {
             onSwipe('right');
         } else if (info.offset.x < -THRESHOLD) {
