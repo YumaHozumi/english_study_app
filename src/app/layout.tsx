@@ -3,13 +3,13 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "English Study App",
-  description: "忘却曲線に基づく英語学習アプリ",
+  title: "Kioku - 検索を記憶に変える英語学習アプリ",
+  description: "調べた英語を忘れない。SRSで効率的に記憶を定着させる英語学習アプリ。",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "English Study",
+    title: "Kioku",
   },
 };
 

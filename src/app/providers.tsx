@@ -13,9 +13,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 <ServiceWorkerRegistration />
                 <div className="app-container pb-20">
                     <header className="mb-6 flex justify-between items-center px-4">
-                        <div className="text-left">
-                            <h1 className="text-2xl m-0">English Study App</h1>
-                            <p className="opacity-60 text-sm m-0">Turn your searches into study notes</p>
+                        <div className="flex flex-col">
+                            <img
+                                src="/kioku-logo.png"
+                                alt="Kioku"
+                                className="h-8"
+                            />
+                            <p className="opacity-60 text-xs m-0 mt-1">検索を記憶に変える</p>
                         </div>
                         <HeaderUserButton />
                     </header>

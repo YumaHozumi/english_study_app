@@ -305,7 +305,7 @@ export default function SettingsPage() {
 
             {/* Version info */}
             <div className="mt-8 text-center text-[var(--text-secondary)] text-xs">
-                <p>English Study App v0.1.0</p>
+                <p>Kioku v0.1.0</p>
             </div>
 
             {/* Delete Account Modal */}
