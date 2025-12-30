@@ -65,7 +65,7 @@ export async function getStudyStats(): Promise<StudyStats> {
     ).length;
 
     // Calculate streak (consecutive days with reviews)
-    const streakDays = await calculateStreak(session.user.id);
+    const streakDays = calculateStreakFromEntries(entries);
 
     return {
         totalWords,
@@ -79,14 +79,9 @@ export async function getStudyStats(): Promise<StudyStats> {
 }
 
 /**
- * Calculate consecutive study days streak
+ * Calculate consecutive study days streak from entries
  */
-async function calculateStreak(userId: string): Promise<number> {
-    const entries = await db
-        .select()
-        .from(vocabularyEntries)
-        .where(eq(vocabularyEntries.userId, userId));
-
+function calculateStreakFromEntries(entries: Array<{ lastReviewedAt: number | null }>): number {
     // Get unique dates with reviews
     const reviewDates = new Set<string>();
     entries.forEach(e => {
@@ -119,19 +114,9 @@ async function calculateStreak(userId: string): Promise<number> {
 }
 
 /**
- * Get review history for the last N days
+ * Calculate review history from entries
  */
-export async function getReviewHistory(days: number = 7): Promise<DailyReviewData[]> {
-    const session = await auth();
-    if (!session?.user?.id) {
-        throw new Error('Unauthorized');
-    }
-
-    const entries = await db
-        .select()
-        .from(vocabularyEntries)
-        .where(eq(vocabularyEntries.userId, session.user.id));
-
+function calculateHistoryFromEntries(entries: Array<{ lastReviewedAt: number | null }>, days: number = 7): DailyReviewData[] {
     // Create a map of date -> review count
     const reviewMap = new Map<string, number>();
 
@@ -158,4 +143,80 @@ export async function getReviewHistory(days: number = 7): Promise<DailyReviewDat
     }
 
     return result;
+}
+
+/**
+ * Get all stats page data with a single DB query
+ * Used by the Server Component to fetch all data at once
+ */
+export async function getStatsPageData(): Promise<{ stats: StudyStats; history: DailyReviewData[] }> {
+    const session = await auth();
+
+    const defaultStats: StudyStats = {
+        totalWords: 0,
+        masteredWords: 0,
+        learningWords: 0,
+        masteryRate: 0,
+        totalReviews: 0,
+        todayReviews: 0,
+        streakDays: 0,
+    };
+
+    if (!session?.user?.id) {
+        return { stats: defaultStats, history: [] };
+    }
+
+    // Single DB query for all data
+    const entries = await db
+        .select()
+        .from(vocabularyEntries)
+        .where(eq(vocabularyEntries.userId, session.user.id));
+
+    // Calculate all stats from the same data
+    const totalWords = entries.length;
+    const masteredWords = entries.filter(e => e.isMastered).length;
+    const learningWords = totalWords - masteredWords;
+    const masteryRate = totalWords > 0 ? Math.round((masteredWords / totalWords) * 100) : 0;
+    const totalReviews = entries.reduce((sum, e) => sum + (e.reviewCount ?? 0), 0);
+
+    // Today's reviews
+    const todayStart = getStartOfDay(new Date());
+    const todayEnd = getEndOfDay(new Date());
+    const todayReviews = entries.filter(e =>
+        e.lastReviewedAt && e.lastReviewedAt >= todayStart && e.lastReviewedAt <= todayEnd
+    ).length;
+
+    // Calculate streak and history from the same entries
+    const streakDays = calculateStreakFromEntries(entries);
+    const history = calculateHistoryFromEntries(entries, 7);
+
+    return {
+        stats: {
+            totalWords,
+            masteredWords,
+            learningWords,
+            masteryRate,
+            totalReviews,
+            todayReviews,
+            streakDays,
+        },
+        history,
+    };
+}
+
+/**
+ * Get review history for the last N days (legacy, still available for backward compatibility)
+ */
+export async function getReviewHistory(days: number = 7): Promise<DailyReviewData[]> {
+    const session = await auth();
+    if (!session?.user?.id) {
+        throw new Error('Unauthorized');
+    }
+
+    const entries = await db
+        .select()
+        .from(vocabularyEntries)
+        .where(eq(vocabularyEntries.userId, session.user.id));
+
+    return calculateHistoryFromEntries(entries, days);
 }
