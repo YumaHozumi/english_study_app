@@ -13,16 +13,17 @@ export interface SwipeConfig {
 
 interface SwipeableCardProps {
     data: SearchResult;
-    onSwipe: (direction: 'left' | 'right') => void;
+    onSwipe?: (direction: 'left' | 'right') => void;
     swipeDirection: 'left' | 'right' | null;
     swipeConfig: SwipeConfig;
     style?: React.CSSProperties;
+    isActive?: boolean;
 }
 
-export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, style }: SwipeableCardProps) => {
+export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, style, isActive = true }: SwipeableCardProps) => {
     const x = useMotionValue(0);
     const rotate = useTransform(x, [-200, 200], [-25, 25]);
-    const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+    const dragOpacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
 
     const RightIcon = swipeConfig.rightIcon;
     const LeftIcon = swipeConfig.leftIcon;
@@ -34,9 +35,9 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
     const handleDragEnd = (_: unknown, info: PanInfo) => {
         const THRESHOLD = 100;
         if (info.offset.x > THRESHOLD) {
-            onSwipe('right');
+            onSwipe?.('right');
         } else if (info.offset.x < -THRESHOLD) {
-            onSwipe('left');
+            onSwipe?.('left');
         } else {
             // 閾値未満: スプリングアニメーションで元の位置に戻す
             animate(x, 0, { type: 'spring', stiffness: 300, damping: 20 });
@@ -52,26 +53,40 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
                 minHeight: '400px',
                 borderRadius: '20px',
                 boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-                position: 'relative',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
                 marginLeft: 'auto',
                 marginRight: 'auto',
-                cursor: 'grab',
+                cursor: isActive ? 'grab' : 'default',
                 x,
-                rotate,
-                opacity,
+                rotate: isActive ? rotate : 0,
+                opacity: isActive ? dragOpacity : 1,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
                 alignItems: 'center',
                 padding: 'clamp(1rem, 4vw, 2rem)',
                 paddingTop: 'clamp(3rem, 8vh, 5rem)',
+                pointerEvents: isActive ? 'auto' : 'none',
                 ...style
             }}
-            drag="x"
+            animate={{
+                scale: isActive ? 1 : 0.95,
+                opacity: isActive ? 1 : 0.7,
+                zIndex: isActive ? 10 : 1,
+            }}
+            transition={{
+                scale: { type: 'spring', stiffness: 300, damping: 25 },
+                opacity: { duration: 0.2 },
+                zIndex: { duration: 0 },
+            }}
+            drag={isActive ? "x" : false}
             dragConstraints={{ left: -150, right: 150 }}
             dragElastic={0.7}
-            onDragEnd={handleDragEnd}
-            whileTap={{ cursor: 'grabbing', scale: 1.02 }}
+            onDragEnd={isActive ? handleDragEnd : undefined}
+            whileTap={isActive ? { cursor: 'grabbing', scale: 1.02 } : undefined}
             exit={{
                 x: swipeDirection === 'right' ? 500 : swipeDirection === 'left' ? -500 : 0,
                 opacity: 0,
@@ -84,21 +99,25 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
                 }
             }}
         >
-            {/* Overlay Icons with Labels */}
-            <motion.div
-                className="absolute top-6 right-6 flex flex-col items-center gap-1 sm:top-10 sm:right-10"
-                style={{ opacity: rightIconOpacity, color: swipeConfig.rightColor }}
-            >
-                <RightIcon size={48} strokeWidth={3} />
-                <span className="text-sm font-medium">{swipeConfig.rightLabel}</span>
-            </motion.div>
-            <motion.div
-                className="absolute top-6 left-6 flex flex-col items-center gap-1 sm:top-10 sm:left-10"
-                style={{ opacity: leftIconOpacity, color: swipeConfig.leftColor }}
-            >
-                <LeftIcon size={48} strokeWidth={3} />
-                <span className="text-sm font-medium">{swipeConfig.leftLabel}</span>
-            </motion.div>
+            {/* Overlay Icons with Labels - only show for active card */}
+            {isActive && (
+                <>
+                    <motion.div
+                        className="absolute top-6 right-6 flex flex-col items-center gap-1 sm:top-10 sm:right-10"
+                        style={{ opacity: rightIconOpacity, color: swipeConfig.rightColor }}
+                    >
+                        <RightIcon size={48} strokeWidth={3} />
+                        <span className="text-sm font-medium">{swipeConfig.rightLabel}</span>
+                    </motion.div>
+                    <motion.div
+                        className="absolute top-6 left-6 flex flex-col items-center gap-1 sm:top-10 sm:left-10"
+                        style={{ opacity: leftIconOpacity, color: swipeConfig.leftColor }}
+                    >
+                        <LeftIcon size={48} strokeWidth={3} />
+                        <span className="text-sm font-medium">{swipeConfig.leftLabel}</span>
+                    </motion.div>
+                </>
+            )}
 
             <div className="text-center w-full">
                 <h2 className="text-3xl sm:text-4xl mb-2 text-[var(--text-primary)]">{data.word}</h2>

@@ -18,7 +18,15 @@ export const FlashcardStack = ({ results, onSave, onDiscard, onComplete, swipeCo
     const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
 
     const activeResult = results[currentIndex];
-    const nextResult = results[currentIndex + 1];
+
+    // 表示するカード（現在 + 次の1枚）をインデックスベースで管理
+    const visibleCards = results
+        .slice(currentIndex, currentIndex + 2)
+        .map((result, offset) => ({
+            data: result,
+            originalIndex: currentIndex + offset,
+            isActive: offset === 0,
+        }));
 
     // Call onComplete when all cards are reviewed
     useEffect(() => {
@@ -60,9 +68,9 @@ export const FlashcardStack = ({ results, onSave, onDiscard, onComplete, swipeCo
     }
 
     return (
-        <div className="relative w-full max-w-[400px] mx-auto">
+        <div className="relative w-full max-w-[400px] mx-auto" style={{ minHeight: '450px' }}>
             {/* Undo Button */}
-            <div className="w-full flex justify-end pr-4 mb-4">
+            <div className="w-full flex justify-end pr-4 mb-4" style={{ position: 'relative', zIndex: 20 }}>
                 {history.length > 0 && (
                     <button
                         onClick={handleUndo}
@@ -74,16 +82,21 @@ export const FlashcardStack = ({ results, onSave, onDiscard, onComplete, swipeCo
                 )}
             </div>
 
-            {/* Active Card */}
-            <AnimatePresence>
-                <SwipeableCard
-                    key={currentIndex}
-                    data={activeResult}
-                    onSwipe={handleSwipe}
-                    swipeDirection={swipeDirection}
-                    swipeConfig={swipeConfig}
-                />
-            </AnimatePresence>
+            {/* カードスタック - インデックスベースでレンダリング */}
+            <div className="relative" style={{ minHeight: '400px' }}>
+                <AnimatePresence>
+                    {visibleCards.map((card) => (
+                        <SwipeableCard
+                            key={card.originalIndex}
+                            data={card.data}
+                            isActive={card.isActive}
+                            onSwipe={card.isActive ? handleSwipe : undefined}
+                            swipeDirection={card.isActive ? swipeDirection : null}
+                            swipeConfig={swipeConfig}
+                        />
+                    ))}
+                </AnimatePresence>
+            </div>
         </div>
     );
 };
