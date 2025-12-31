@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import type { SearchResult } from '../../types';
 import type { LucideIcon } from 'lucide-react';
+import { Eye, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export interface SwipeConfig {
     rightIcon: LucideIcon;
@@ -18,9 +20,19 @@ interface SwipeableCardProps {
     swipeConfig: SwipeConfig;
     style?: React.CSSProperties;
     isActive?: boolean;
+    quizMode?: boolean; // true: 意味を隠してクイズ形式、false: 全表示
 }
 
-export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, style, isActive = true }: SwipeableCardProps) => {
+export const SwipeableCard = ({
+    data,
+    onSwipe,
+    swipeDirection,
+    swipeConfig,
+    style,
+    isActive = true,
+    quizMode = false
+}: SwipeableCardProps) => {
+    const [isRevealed, setIsRevealed] = useState(!quizMode);
     const x = useMotionValue(0);
     const rotate = useTransform(x, [-200, 200], [-25, 25]);
     const dragOpacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
@@ -28,9 +40,17 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
     const RightIcon = swipeConfig.rightIcon;
     const LeftIcon = swipeConfig.leftIcon;
 
+    // カードが変わったらリセット
+    useEffect(() => {
+        setIsRevealed(!quizMode);
+    }, [data.word, quizMode]);
+
     // アイコン/ラベル: 30px～50pxで素早くフェードイン
     const rightIconOpacity = useTransform(x, [30, 50], [0, 1]);
     const leftIconOpacity = useTransform(x, [-50, -30], [1, 0]);
+
+    // スワイプ可能かどうか（クイズモードでは意味表示後のみ）
+    const canSwipe = isActive && (!quizMode || isRevealed);
 
     const handleDragEnd = (_: unknown, info: PanInfo) => {
         const THRESHOLD = 100;
@@ -42,6 +62,10 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
             // 閾値未満: スプリングアニメーションで元の位置に戻す
             animate(x, 0, { type: 'spring', stiffness: 300, damping: 20 });
         }
+    };
+
+    const handleReveal = () => {
+        setIsRevealed(true);
     };
 
     return (
@@ -59,9 +83,9 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
                 right: 0,
                 marginLeft: 'auto',
                 marginRight: 'auto',
-                cursor: isActive ? 'grab' : 'default',
+                cursor: canSwipe ? 'grab' : 'default',
                 x,
-                rotate: isActive ? rotate : 0,
+                rotate: canSwipe ? rotate : 0,
                 opacity: isActive ? dragOpacity : 1,
                 display: 'flex',
                 flexDirection: 'column',
@@ -82,11 +106,11 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
                 opacity: { duration: 0.2 },
                 zIndex: { duration: 0 },
             }}
-            drag={isActive ? "x" : false}
+            drag={canSwipe ? "x" : false}
             dragConstraints={{ left: -150, right: 150 }}
             dragElastic={0.7}
-            onDragEnd={isActive ? handleDragEnd : undefined}
-            whileTap={isActive ? { cursor: 'grabbing', scale: 1.02 } : undefined}
+            onDragEnd={canSwipe ? handleDragEnd : undefined}
+            whileTap={canSwipe ? { cursor: 'grabbing', scale: 1.02 } : undefined}
             exit={{
                 x: swipeDirection === 'right' ? 500 : swipeDirection === 'left' ? -500 : 0,
                 opacity: 0,
@@ -99,8 +123,8 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
                 }
             }}
         >
-            {/* Overlay Icons with Labels - only show for active card */}
-            {isActive && (
+            {/* Overlay Icons with Labels - only show for active card when revealed */}
+            {isActive && isRevealed && (
                 <>
                     <motion.div
                         className="absolute top-6 right-6 flex flex-col items-center gap-1 sm:top-10 sm:right-10"
@@ -123,23 +147,50 @@ export const SwipeableCard = ({ data, onSwipe, swipeDirection, swipeConfig, styl
                 <h2 className="text-3xl sm:text-4xl mb-2 text-[var(--text-primary)]">{data.word}</h2>
                 <p className="text-lg sm:text-xl text-[var(--text-secondary)] mb-6 sm:mb-8 italic">{data.phonetic}</p>
 
-                <div className="text-left w-full mb-4 sm:mb-6">
-                    <h3 className="text-sm uppercase text-[var(--text-tertiary)] mb-2 tracking-wide">Meaning</h3>
-                    <p className="text-base sm:text-lg text-[var(--text-primary)] leading-relaxed break-words">{data.meaning}</p>
-                </div>
+                {/* クイズモード: 意味非表示時 */}
+                {quizMode && !isRevealed ? (
+                    <div className="flex flex-col gap-4 mt-8">
+                        <button
+                            onClick={handleReveal}
+                            className="w-full py-4 px-6 bg-indigo-500 text-white rounded-xl border-none cursor-pointer flex items-center justify-center gap-2 text-lg font-medium hover:bg-indigo-600 transition-colors"
+                        >
+                            <Eye size={24} />
+                            タップして意味を確認
+                        </button>
+                    </div>
+                ) : (
+                    /* 通常表示 or 意味表示後 */
+                    <>
+                        <div className="text-left w-full mb-4 sm:mb-6">
+                            <h3 className="text-sm uppercase text-[var(--text-tertiary)] mb-2 tracking-wide">Meaning</h3>
+                            <p className="text-base sm:text-lg text-[var(--text-primary)] leading-relaxed break-words">{data.meaning}</p>
+                        </div>
 
-                <div className="text-left w-full">
-                    <h3 className="text-sm uppercase text-[var(--text-tertiary)] mb-2 tracking-wide">Example</h3>
-                    <p className="text-sm sm:text-base text-[var(--text-primary)] mb-2 break-words">{data.example}</p>
-                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">{data.exampleJp}</p>
-                </div>
+                        <div className="text-left w-full">
+                            <h3 className="text-sm uppercase text-[var(--text-tertiary)] mb-2 tracking-wide">Example</h3>
+                            <p className="text-sm sm:text-base text-[var(--text-primary)] mb-2 break-words">{data.example}</p>
+                            <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">{data.exampleJp}</p>
+                        </div>
+                    </>
+                )}
             </div>
 
-            <div className="text-xs text-[var(--text-tertiary)] mt-auto pt-3 flex items-center justify-center gap-3 shrink-0">
-                <span>← {swipeConfig.leftLabel}</span>
-                <span>•</span>
-                <span>{swipeConfig.rightLabel} →</span>
-            </div>
+            {/* スワイプガイド: 意味表示後のみ */}
+            {isRevealed && (
+                <div className="mt-auto pt-4 w-full shrink-0">
+                    <div className="flex items-center justify-center gap-2 text-sm text-[var(--text-tertiary)]">
+                        <span style={{ color: swipeConfig.leftColor }} className="flex items-center gap-1">
+                            <ArrowLeft size={18} />
+                            {swipeConfig.leftLabel}
+                        </span>
+                        <span className="mx-4">スワイプで回答</span>
+                        <span style={{ color: swipeConfig.rightColor }} className="flex items-center gap-1">
+                            {swipeConfig.rightLabel}
+                            <ArrowRight size={18} />
+                        </span>
+                    </div>
+                </div>
+            )}
         </motion.div>
     );
 };

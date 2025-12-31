@@ -10,9 +10,10 @@ interface FlashcardStackProps {
     onDiscard?: (result: SearchResult) => void;
     onComplete?: () => void;
     swipeConfig: SwipeConfig;
+    quizMode?: boolean;
 }
 
-export const FlashcardStack = ({ results, onSave, onDiscard, onComplete, swipeConfig }: FlashcardStackProps) => {
+export const FlashcardStack = ({ results, onSave, onDiscard, onComplete, swipeConfig, quizMode = false }: FlashcardStackProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [history, setHistory] = useState<number[]>([]);
     const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
@@ -93,6 +94,7 @@ export const FlashcardStack = ({ results, onSave, onDiscard, onComplete, swipeCo
                             onSwipe={card.isActive ? handleSwipe : undefined}
                             swipeDirection={card.isActive ? swipeDirection : null}
                             swipeConfig={swipeConfig}
+                            quizMode={quizMode}
                         />
                     ))}
                 </AnimatePresence>

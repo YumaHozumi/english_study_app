@@ -329,6 +329,7 @@ export function StudyView({ initialWords, isAuthenticated }: StudyViewProps) {
                 }}
                 onComplete={() => setReviewCompleted(true)}
                 swipeConfig={studySwipeConfig}
+                quizMode={true}
             />
         </div>
     );
