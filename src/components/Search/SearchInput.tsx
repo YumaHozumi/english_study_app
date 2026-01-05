@@ -12,6 +12,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onSearch, isLoading })
         e.preventDefault();
         if (query.trim()) {
             onSearch(query.trim());
+            setQuery(''); // 連続検索のため入力欄をクリア
         }
     };
 

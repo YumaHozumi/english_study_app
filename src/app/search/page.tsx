@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { SearchInput } from '@/components/Search/SearchInput';
 import { TranslationSection } from '@/components/Search/TranslationSection';
 import { FlashcardStack } from '@/components/Flashcard/FlashcardStack';
+import { CardSkeleton } from '@/components/Flashcard/CardSkeleton';
 import { Toast } from '@/components/Toast';
 import { LLMService } from '@/services/llm';
 import { VocabularyStorage } from '@/services/vocabulary';
@@ -93,7 +94,9 @@ export default function SearchPage() {
             )}
 
             <div className="flex flex-col gap-4">
-                {results.length > 0 && (
+                {isLoading ? (
+                    <CardSkeleton />
+                ) : results.length > 0 ? (
                     <FlashcardStack
                         results={results}
                         onSave={handleSave}
@@ -102,7 +105,7 @@ export default function SearchPage() {
                         }}
                         swipeConfig={searchSwipeConfig}
                     />
-                )}
+                ) : null}
             </div>
 
             <AnimatePresence>
