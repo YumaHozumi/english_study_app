@@ -51,7 +51,6 @@ export class MockProvider implements LLMProvider {
         const words = query.trim().split(/\s+/).slice(0, 2);
 
         return {
-            full_translation: `【モック翻訳】${query}`,
             words: words.map((word) => ({
                 word: word.replace(/[.,!?]/g, ''),
                 phonetic: '/mɒk/',
