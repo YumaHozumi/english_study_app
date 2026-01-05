@@ -29,8 +29,7 @@ export interface CachedSearchResult {
         example: string;
         exampleJp: string;
     }>;
-    fullTranslation?: string;
-    originalText?: string;
+    sentencePairs?: { en: string; ja: string }[];
 }
 
 export const searchCache = {
