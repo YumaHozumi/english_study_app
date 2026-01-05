@@ -12,9 +12,14 @@ export interface SearchResultItem {
     example_jp: string;
 }
 
+export interface SentencePair {
+    en: string;
+    ja: string;
+}
+
 export interface LLMResponse {
     words: SearchResultItem[];
-    full_translation?: string;
+    sentence_pairs?: SentencePair[];
 }
 
 export interface LLMProviderOptions {

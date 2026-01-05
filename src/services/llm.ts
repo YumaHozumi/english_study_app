@@ -42,8 +42,7 @@ export class LLMService {
 
             return {
                 results,
-                fullTranslation: data.fullTranslation,
-                originalText: data.originalText,
+                sentencePairs: data.sentencePairs,
             };
         } catch (error) {
             console.error("API Error:", error);

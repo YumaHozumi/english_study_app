@@ -11,7 +11,7 @@ import { Toast } from '@/components/Toast';
 import { LLMService } from '@/services/llm';
 import { VocabularyStorage } from '@/services/vocabulary';
 import { saveVocabularyEntry } from '@/actions/vocabulary';
-import type { SearchResult } from '@/types';
+import type { SearchResult, SentencePair } from '@/types';
 import { AnimatePresence } from 'framer-motion';
 import { Plus, Trash2 } from 'lucide-react';
 import type { SwipeConfig } from '@/components/Flashcard/SwipeableCard';
@@ -31,8 +31,7 @@ export default function SearchPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [results, setResults] = useState<SearchResult[]>([]);
-    const [fullTranslation, setFullTranslation] = useState<string | null>(null);
-    const [originalText, setOriginalText] = useState<string | null>(null);
+    const [sentencePairs, setSentencePairs] = useState<SentencePair[] | null>(null);
     const [isPending, startTransition] = useTransition();
     const [showToast, setShowToast] = useState(false);
     const [savedCount, setSavedCount] = useState(0);
@@ -40,16 +39,14 @@ export default function SearchPage() {
     const handleSearch = async (query: string) => {
         setIsLoading(true);
         setResults([]);
-        setFullTranslation(null);
-        setOriginalText(null);
+        setSentencePairs(null);
 
         try {
             const llm = new LLMService();
             const data = await llm.searchWord(query);
             setResults(data.results);
-            if (data.fullTranslation && data.originalText) {
-                setFullTranslation(data.fullTranslation);
-                setOriginalText(data.originalText);
+            if (data.sentencePairs) {
+                setSentencePairs(data.sentencePairs);
             }
         } catch (error) {
             console.error(error);
@@ -86,10 +83,9 @@ export default function SearchPage() {
             <SearchInput onSearch={handleSearch} isLoading={isLoading || isPending} />
 
             {/* Translation Section - shown only for sentences */}
-            {fullTranslation && originalText && (
+            {sentencePairs && (
                 <TranslationSection
-                    originalText={originalText}
-                    translation={fullTranslation}
+                    sentencePairs={sentencePairs}
                 />
             )}
 

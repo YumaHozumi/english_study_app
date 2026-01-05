@@ -39,16 +39,14 @@ export async function POST(request: NextRequest) {
         const wordCount = query.trim().split(/\s+/).length;
         const isSentence = wordCount >= 3;
 
-        // Build response with optional fullTranslation
+        // Build response with optional sentencePairs
         const responseData: {
             results: typeof results;
-            fullTranslation?: string;
-            originalText?: string;
+            sentencePairs?: { en: string; ja: string }[];
         } = { results };
 
-        if (isSentence && data.full_translation) {
-            responseData.fullTranslation = data.full_translation;
-            responseData.originalText = query;
+        if (isSentence && data.sentence_pairs) {
+            responseData.sentencePairs = data.sentence_pairs;
         }
 
         // キャッシュに保存

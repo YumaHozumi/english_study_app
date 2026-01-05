@@ -42,8 +42,9 @@ export class GeminiProvider implements LLMProvider {
       return `You are an English teacher. The user has provided the following sentence/paragraph: "${query}".
 
 INSTRUCTIONS:
-1. Provide a full Japanese translation of the entire input.
-2. Identify 1 to 3 keywords from the input that are MOST USEFUL for general English learning.
+1. Split the input into individual sentences.
+2. Provide a Japanese translation for EACH sentence.
+3. Identify 1 to 3 keywords that are MOST USEFUL for general English learning.
 
 KEYWORD SELECTION RULES:
 - AVOID domain-specific jargon (programming terms, legal terms, medical terms, brand names, etc.)
@@ -59,7 +60,10 @@ KEYWORD SELECTION RULES:
 
 Return your response in this STRICT JSON format:
 {
-  "full_translation": "Full Japanese translation of the entire input",
+  "sentence_pairs": [
+    { "en": "First English sentence.", "ja": "最初の日本語文。" },
+    { "en": "Second English sentence.", "ja": "2番目の日本語文。" }
+  ],
   "words": [
     {
       "word": "The word/phrase",

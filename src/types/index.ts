@@ -16,8 +16,12 @@ export interface WordEntry {
 
 export type SearchResult = Omit<WordEntry, 'id' | 'timestamp'>;
 
+export interface SentencePair {
+    en: string;
+    ja: string;
+}
+
 export interface SearchResponse {
     results: SearchResult[];
-    fullTranslation?: string;
-    originalText?: string;
+    sentencePairs?: SentencePair[];
 }
