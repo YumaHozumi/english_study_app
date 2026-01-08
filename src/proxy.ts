@@ -21,9 +21,33 @@ export async function proxy(request: NextRequest) {
         // (OAuth プロバイダーからのリダイレクトは外部リファラーを持つため)
         const isAuthCallback = request.nextUrl.pathname.startsWith('/api/auth/');
 
+        // Chrome拡張機能からのリクエストを許可
+        const origin = request.headers.get('origin');
+        const isChromeExtension = origin?.startsWith('chrome-extension://');
+
+        if (isChromeExtension) {
+            // プリフライトリクエスト（OPTIONS）の場合
+            if (request.method === 'OPTIONS') {
+                return new NextResponse(null, {
+                    status: 204,
+                    headers: {
+                        'Access-Control-Allow-Origin': origin!,
+                        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    },
+                });
+            }
+
+            // 通常のリクエストはCORSヘッダー付きで続行
+            const response = NextResponse.next();
+            response.headers.set('Access-Control-Allow-Origin', origin!);
+            response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+            response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            return response;
+        }
+
         // 本番環境でのオリジン検証（認証コールバック以外）
         if (process.env.NODE_ENV === 'production' && !isAuthCallback) {
-            const origin = request.headers.get('origin');
             const referer = request.headers.get('referer');
 
             // ブラウザからのリクエストでオリジンが不正な場合はブロック
