@@ -11,6 +11,31 @@ const JWT_SECRET = new TextEncoder().encode(
     process.env.EXTENSION_JWT_SECRET || 'your-secret-key-change-in-production'
 );
 
+// CORS ヘッダーを追加するヘルパー（Chrome拡張機能のみ許可）
+function corsHeaders(request: NextRequest): HeadersInit {
+    const origin = request.headers.get('Origin') || '';
+
+    // chrome-extension:// からのリクエストのみ許可
+    if (origin.startsWith('chrome-extension://')) {
+        return {
+            'Access-Control-Allow-Origin': origin,
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        };
+    }
+
+    // その他のオリジンは許可しない（ヘッダーなし）
+    return {};
+}
+
+// プリフライトリクエスト（OPTIONS）のハンドラー
+export async function OPTIONS(request: NextRequest) {
+    return new NextResponse(null, {
+        status: 204,
+        headers: corsHeaders(request),
+    });
+}
+
 interface GitHubTokenResponse {
     access_token: string;
     token_type: string;
@@ -32,7 +57,7 @@ export async function POST(request: NextRequest) {
         if (!code) {
             return NextResponse.json(
                 { error: '認証コードが必要です' },
-                { status: 400 }
+                { status: 400, headers: corsHeaders(request) }
             );
         }
 
@@ -55,12 +80,11 @@ export async function POST(request: NextRequest) {
         );
 
         const tokenData: GitHubTokenResponse = await tokenResponse.json();
-        console.log('[Extension Auth] GitHub token response:', JSON.stringify(tokenData));
 
         if (!tokenData.access_token) {
             return NextResponse.json(
                 { error: 'アクセストークンの取得に失敗しました' },
-                { status: 401 }
+                { status: 401, headers: corsHeaders(request) }
             );
         }
 
@@ -119,19 +143,22 @@ export async function POST(request: NextRequest) {
             .setExpirationTime('7d')
             .sign(JWT_SECRET);
 
-        return NextResponse.json({
-            token,
-            user: {
-                id: userId,
-                name: githubUser.name || githubUser.login,
-                image: githubUser.avatar_url,
+        return NextResponse.json(
+            {
+                token,
+                user: {
+                    id: userId,
+                    name: githubUser.name || githubUser.login,
+                    image: githubUser.avatar_url,
+                },
             },
-        });
+            { headers: corsHeaders(request) }
+        );
     } catch (error) {
         console.error('Extension auth error:', error);
         return NextResponse.json(
             { error: '認証処理中にエラーが発生しました' },
-            { status: 500 }
+            { status: 500, headers: corsHeaders(request) }
         );
     }
 }
