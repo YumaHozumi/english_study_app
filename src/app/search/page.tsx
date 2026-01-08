@@ -61,14 +61,12 @@ export default function SearchPage() {
             startTransition(async () => {
                 try {
                     await saveVocabularyEntry(result);
-                    console.log('Saved to DB:', result.word);
                 } catch (error) {
                     console.error('Failed to save:', error);
                 }
             });
         } else {
             VocabularyStorage.save(result);
-            console.log('Saved to localStorage:', result.word);
 
             const newCount = savedCount + 1;
             setSavedCount(newCount);
@@ -96,8 +94,8 @@ export default function SearchPage() {
                     <FlashcardStack
                         results={results}
                         onSave={handleSave}
-                        onDiscard={(result) => {
-                            console.log('Discarded:', result.word);
+                        onDiscard={() => {
+                            // スキップ時の処理（必要に応じて追加）
                         }}
                         swipeConfig={searchSwipeConfig}
                     />

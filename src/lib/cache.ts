@@ -39,12 +39,10 @@ export const searchCache = {
     async get(query: string): Promise<CachedSearchResult | null> {
         // モックモード時はキャッシュを無効化
         if (process.env.USE_MOCK_LLM === 'true') {
-            console.log('Cache: Disabled in mock mode');
             return null;
         }
 
         if (!redis) {
-            console.log('Cache: Redis not configured, skipping');
             return null;
         }
 
@@ -52,10 +50,8 @@ export const searchCache = {
         try {
             const cached = await redis.get<CachedSearchResult>(key);
             if (cached) {
-                console.log(`Cache HIT: ${normalizeQuery(query)}`);
                 return cached;
             }
-            console.log(`Cache MISS: ${normalizeQuery(query)}`);
             return null;
         } catch (error) {
             console.error('Cache get error:', error);
@@ -79,7 +75,6 @@ export const searchCache = {
         const key = getCacheKey(query);
         try {
             await redis.set(key, result, { ex: CACHE_TTL_SECONDS });
-            console.log(`Cache SET: ${normalizeQuery(query)} (TTL: ${CACHE_TTL_SECONDS}s)`);
         } catch (error) {
             console.error('Cache set error:', error);
         }
