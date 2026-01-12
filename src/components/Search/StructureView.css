@@ -1,0 +1,135 @@
+.structure-view {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.structure-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.structure-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-color);
+}
+
+.structure-hint {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.chunks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chunk-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.chunk-block {
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid transparent;
+}
+
+.chunk-block:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chunk-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.chunk-text {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.chunk-label {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.chunk-detail {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--glass-border);
+    overflow: hidden;
+}
+
+.chunk-ja-text {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.chunk-grammar-note {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-top: 4px;
+}
+
+.chunk-children {
+    border-left: 2px solid var(--glass-border);
+    margin-left: 8px;
+    padding-left: 8px;
+}
+
+/* Color coding by role */
+.chunk-subject {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.chunk-verb {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.chunk-object {
+    background: rgba(249, 115, 22, 0.15);
+    border-color: rgba(249, 115, 22, 0.3);
+}
+
+.chunk-modifier {
+    background: rgba(168, 85, 247, 0.15);
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+.chunk-complement {
+    background: rgba(236, 72, 153, 0.15);
+    border-color: rgba(236, 72, 153, 0.3);
+}
+
+.chunk-adverbial {
+    background: rgba(14, 165, 233, 0.15);
+    border-color: rgba(14, 165, 233, 0.3);
+}

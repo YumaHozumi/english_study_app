@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 
 import type { SentencePair } from '@/types';
+import { StructureView } from './StructureView';
 
 interface TranslationSectionProps {
     sentencePairs: SentencePair[];
@@ -12,6 +14,12 @@ interface TranslationSectionProps {
 export const TranslationSection: React.FC<TranslationSectionProps> = ({
     sentencePairs,
 }) => {
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+    const toggleStructure = (index: number) => {
+        setExpandedIndex(expandedIndex === index ? null : index);
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -28,6 +36,26 @@ export const TranslationSection: React.FC<TranslationSectionProps> = ({
                     <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
                         {pair.ja}
                     </p>
+                    {/* 構造解析アコーディオン */}
+                    {pair.structure && (
+                        <>
+                            <button
+                                onClick={() => toggleStructure(index)}
+                                className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-color)] transition-colors mt-2 bg-transparent border-none cursor-pointer p-0"
+                            >
+                                <ChevronDown
+                                    size={14}
+                                    className={`transition-transform ${expandedIndex === index ? 'rotate-180' : ''}`}
+                                />
+                                <span>構造解説</span>
+                            </button>
+                            <AnimatePresence>
+                                {expandedIndex === index && (
+                                    <StructureView structure={pair.structure} />
+                                )}
+                            </AnimatePresence>
+                        </>
+                    )}
                 </div>
             ))}
         </motion.div>
