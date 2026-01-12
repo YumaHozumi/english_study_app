@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
         const wordCount = query.trim().split(/\s+/).length;
         const isSentence = wordCount >= 3;
 
-        // Build response with optional sentencePairs
+        // Build response with optional sentencePairs (including structure)
         const responseData: {
             results: typeof results;
-            sentencePairs?: { en: string; ja: string }[];
+            sentencePairs?: typeof data.sentence_pairs;
         } = { results };
 
         if (isSentence && data.sentence_pairs) {

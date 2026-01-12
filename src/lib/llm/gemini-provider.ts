@@ -45,6 +45,7 @@ INSTRUCTIONS:
 1. Split the input into individual sentences.
 2. Provide a Japanese translation for EACH sentence.
 3. Identify 1 to 3 keywords that are MOST USEFUL for general English learning.
+4. For EACH sentence, provide a structure breakdown (chunks) to help understand the sentence structure.
 
 KEYWORD SELECTION RULES:
 - AVOID domain-specific jargon (programming terms, legal terms, medical terms, brand names, etc.)
@@ -58,11 +59,33 @@ KEYWORD SELECTION RULES:
   * KEEP -ing/-ed forms if they function as adjectives with distinct meanings (interesting, excited, given, retired)
   * KEEP forms that have become independent words (e.g., "given" as preposition meaning "considering")
 
+STRUCTURE BREAKDOWN RULES:
+- Break each sentence into meaningful chunks (Subject, Verb, Object, Modifier, etc.)
+- For each chunk, provide:
+  * id (number): unique identifier
+  * text (string): the English chunk text
+  * label (string): English grammatical role (Subject, Verb, Object, Modifier, Complement, Adverbial, etc.)
+  * jp_label (string): Japanese role name (主語, 動詞, 目的語, 修飾節, 補語, 副詞句, etc.)
+  * modifies_id (number|null): which chunk this modifies (null if root/main clause)
+  * ja_text (string): Japanese translation of THIS chunk (corresponding part from the full translation)
+  * grammar_note (string, optional): Only include for complex structures (relative clauses, participle phrases, etc.) to explain the grammar
+- Use modifies_id to show dependencies (e.g., a relative clause modifies its antecedent)
+
 Return your response in this STRICT JSON format:
 {
   "sentence_pairs": [
-    { "en": "First English sentence.", "ja": "最初の日本語文。" },
-    { "en": "Second English sentence.", "ja": "2番目の日本語文。" }
+    {
+      "en": "The framework upon which the research was based had flaws.",
+      "ja": "研究が基づいていた枠組みには欠陥があった。",
+      "structure": {
+        "chunks": [
+          { "id": 1, "text": "The framework", "label": "Subject", "jp_label": "主語", "modifies_id": null, "ja_text": "枠組みには" },
+          { "id": 2, "text": "upon which the research was based", "label": "Modifier", "jp_label": "修飾節", "modifies_id": 1, "ja_text": "研究が基づいていた", "grammar_note": "upon which = 前置詞+関係代名詞。先行詞frameworkを修飾" },
+          { "id": 3, "text": "had", "label": "Verb", "jp_label": "動詞", "modifies_id": null, "ja_text": "あった" },
+          { "id": 4, "text": "flaws", "label": "Object", "jp_label": "目的語", "modifies_id": 3, "ja_text": "欠陥が" }
+        ]
+      }
+    }
   ],
   "words": [
     {

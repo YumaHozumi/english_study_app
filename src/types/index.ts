@@ -19,6 +19,21 @@ export type SearchResult = Omit<WordEntry, 'id' | 'timestamp'>;
 export interface SentencePair {
     en: string;
     ja: string;
+    structure?: SentenceStructure;
+}
+
+export interface Chunk {
+    id: number;
+    text: string;
+    label: string;
+    jp_label: string;
+    modifies_id: number | null;
+    ja_text: string;
+    grammar_note?: string;
+}
+
+export interface SentenceStructure {
+    chunks: Chunk[];
 }
 
 export interface SearchResponse {
