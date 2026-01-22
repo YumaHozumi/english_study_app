@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 import type { SentencePair } from '@/types';
 import { StructureView } from './StructureView';
@@ -43,9 +43,9 @@ export const TranslationSection: React.FC<TranslationSectionProps> = ({
                                 onClick={() => toggleStructure(index)}
                                 className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-color)] transition-colors mt-2 bg-transparent border-none cursor-pointer p-0"
                             >
-                                <ChevronDown
+                                <ChevronRight
                                     size={14}
-                                    className={`transition-transform ${expandedIndex === index ? 'rotate-180' : ''}`}
+                                    className={`transition-transform ${expandedIndex === index ? 'rotate-90' : ''}`}
                                 />
                                 <span>構造解説</span>
                             </button>
