@@ -1,21 +1,24 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import type { LLMProvider, LLMResponse } from './types';
+import { WordResponseSchema, SentenceResponseSchema } from './schemas';
 
 /**
  * Gemini API を使用する本番用プロバイダー
+ * 
+ * JSON Mode (構造化出力) を使用してLLMレスポンスの形式を保証
  */
 export class GeminiProvider implements LLMProvider {
   readonly name = 'gemini';
-  private model;
+  private ai: GoogleGenAI;
+  private modelName: string;
 
   constructor() {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       throw new Error('GEMINI_API_KEY is not set');
     }
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const modelName = process.env.MODEL_NAME || 'gemini-2.0-flash-exp';
-    this.model = genAI.getGenerativeModel({ model: modelName });
+    this.ai = new GoogleGenAI({ apiKey });
+    this.modelName = process.env.MODEL_NAME || 'gemini-2.5-flash-lite';
   }
 
   async analyze(query: string): Promise<LLMResponse> {
@@ -23,18 +26,24 @@ export class GeminiProvider implements LLMProvider {
     const isSentence = wordCount >= 3;
 
     const prompt = this.buildPrompt(query, isSentence);
-    const result = await this.model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const schema = isSentence ? SentenceResponseSchema : WordResponseSchema;
 
-    // Clean up potential code blocks
-    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    const response = await this.ai.models.generateContent({
+      model: this.modelName,
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: schema,
+      },
+    });
 
-    try {
-      return JSON.parse(cleanText) as LLMResponse;
-    } catch {
-      throw new Error('Failed to parse LLM response');
+    // JSON Modeではクリーンなレスポンスが返るため、直接パース可能
+    const text = response.text;
+    if (!text) {
+      throw new Error('Empty response from LLM');
     }
+
+    return JSON.parse(text) as LLMResponse;
   }
 
   private buildPrompt(query: string, isSentence: boolean): string {
@@ -69,56 +78,17 @@ STRUCTURE BREAKDOWN RULES:
   * modifies_id (number|null): which chunk this modifies (null if root/main clause)
   * ja_text (string): Japanese translation of THIS chunk (corresponding part from the full translation)
   * grammar_note (string, optional): Only include for complex structures (relative clauses, participle phrases, etc.) to explain the grammar
-- Use modifies_id to show dependencies (e.g., a relative clause modifies its antecedent)
-
-Return your response in this STRICT JSON format:
-{
-  "sentence_pairs": [
-    {
-      "en": "The framework upon which the research was based had flaws.",
-      "ja": "研究が基づいていた枠組みには欠陥があった。",
-      "structure": {
-        "chunks": [
-          { "id": 1, "text": "The framework", "label": "Subject", "jp_label": "主語", "modifies_id": null, "ja_text": "枠組みには" },
-          { "id": 2, "text": "upon which the research was based", "label": "Modifier", "jp_label": "修飾節", "modifies_id": 1, "ja_text": "研究が基づいていた", "grammar_note": "upon which = 前置詞+関係代名詞。先行詞frameworkを修飾" },
-          { "id": 3, "text": "had", "label": "Verb", "jp_label": "動詞", "modifies_id": null, "ja_text": "あった" },
-          { "id": 4, "text": "flaws", "label": "Object", "jp_label": "目的語", "modifies_id": 3, "ja_text": "欠陥が" }
-        ]
-      }
-    }
-  ],
-  "words": [
-    {
-      "word": "The word/phrase",
-      "phonetic": "IPA pronunciation",
-      "meaning": "Clear definition in JAPANESE (日本語)",
-      "example": "A simple, memorable example sentence using this word in a GENERAL everyday context (DO NOT use the original input - create a new, easy-to-understand sentence)",
-      "example_jp": "Japanese translation of the example"
-    }
-  ]
-}
-
-Do not include any markdown formatting like \`\`\`json. Just the raw JSON object.`;
+- Use modifies_id to show dependencies (e.g., a relative clause modifies its antecedent)`;
     }
 
     return `You are an English teacher. The user has provided the following word/phrase: "${query}".
 
 INSTRUCTIONS:
-Define this word/phrase with the following details.
-
-Return your response in this STRICT JSON format:
-{
-  "words": [
-    {
-      "word": "The word/phrase",
-      "phonetic": "IPA pronunciation",
-      "meaning": "Clear definition in JAPANESE (日本語)",
-      "example": "A simple, memorable example sentence",
-      "example_jp": "Japanese translation of the example"
-    }
-  ]
-}
-
-Do not include any markdown formatting like \`\`\`json. Just the raw JSON object.`;
+Define this word/phrase with the following details:
+- word: The word/phrase
+- phonetic: IPA pronunciation
+- meaning: Clear definition in JAPANESE (日本語)
+- example: A simple, memorable example sentence
+- example_jp: Japanese translation of the example`;
   }
 }
