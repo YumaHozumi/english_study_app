@@ -85,6 +85,7 @@ export async function getVocabularyCount() {
 
 import { and, lte, or, isNull } from 'drizzle-orm';
 import { calculateReviewResult, getStartOfToday } from '@/lib/srs';
+import { getDueWords } from '@/db/queries';
 
 /**
  * Update review result for a vocabulary entry
@@ -134,24 +135,7 @@ export async function getTodayReviewWords() {
         throw new Error('Unauthorized');
     }
 
-    const now = Date.now();
-
-    const entries = await db
-        .select()
-        .from(vocabularyEntries)
-        .where(
-            and(
-                eq(vocabularyEntries.userId, session.user.id),
-                eq(vocabularyEntries.isMastered, false),
-                or(
-                    isNull(vocabularyEntries.nextReviewAt),
-                    lte(vocabularyEntries.nextReviewAt, now)
-                )
-            )
-        )
-        .orderBy(vocabularyEntries.nextReviewAt);
-
-    return entries;
+    return getDueWords(session.user.id);
 }
 
 /**

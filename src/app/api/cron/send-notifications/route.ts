@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
 import { db } from '@/db';
-import { pushSubscriptions, vocabularyEntries, users } from '@/db/schema';
-import { eq, and, or, lte, isNull } from 'drizzle-orm';
+import { pushSubscriptions, users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { getDueWordCount } from '@/db/queries';
 
 // Configure VAPID keys
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
@@ -27,8 +28,6 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const now = Date.now();
-
         // Get all users with push subscriptions
         const subscriptions = await db
             .select({
@@ -43,41 +42,11 @@ export async function GET(request: NextRequest) {
 
         for (const { subscription, user } of subscriptions) {
             // Check if this user has words due for review
-            const dueWords = await db
-                .select()
-                .from(vocabularyEntries)
-                .where(
-                    and(
-                        eq(vocabularyEntries.userId, user.id),
-                        eq(vocabularyEntries.isMastered, false),
-                        or(
-                            isNull(vocabularyEntries.nextReviewAt),
-                            lte(vocabularyEntries.nextReviewAt, now)
-                        )
-                    )
-                )
-                .limit(1);
+            const wordCount = await getDueWordCount(user.id);
 
-            if (dueWords.length === 0) {
+            if (wordCount === 0) {
                 continue; // No words due, skip this user
             }
-
-            // Count total due words
-            const allDueWords = await db
-                .select()
-                .from(vocabularyEntries)
-                .where(
-                    and(
-                        eq(vocabularyEntries.userId, user.id),
-                        eq(vocabularyEntries.isMastered, false),
-                        or(
-                            isNull(vocabularyEntries.nextReviewAt),
-                            lte(vocabularyEntries.nextReviewAt, now)
-                        )
-                    )
-                );
-
-            const wordCount = allDueWords.length;
 
             // Send push notification
             const payload = JSON.stringify({
