@@ -14,13 +14,22 @@ export const SRS_MAX_LEVEL = 5;
 // Milliseconds in a day
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
+// JST (UTC+9) offset in milliseconds
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
 /**
  * Get the start of today (midnight) in milliseconds
+ * Note: Always returns JST midnight regardless of server timezone
+ * This ensures Cron (JST 08:00) can correctly detect words due at JST 00:00
  */
 export function getStartOfToday(): number {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    return now.getTime();
+    const now = Date.now();
+    // Convert to JST
+    const jstNow = now + JST_OFFSET_MS;
+    // Get JST midnight (floor to day boundary)
+    const jstMidnight = Math.floor(jstNow / MS_PER_DAY) * MS_PER_DAY;
+    // Convert back to UTC milliseconds
+    return jstMidnight - JST_OFFSET_MS;
 }
 
 /**
