@@ -12,10 +12,10 @@ export const SRS_INTERVALS = [0, 1, 3, 7, 14, 30] as const;
 export const SRS_MAX_LEVEL = 5;
 
 // Milliseconds in a day
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
+export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 // JST (UTC+9) offset in milliseconds
-const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+export const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 /**
  * Get the start of today (midnight) in milliseconds
@@ -30,6 +30,14 @@ export function getStartOfToday(): number {
     const jstMidnight = Math.floor(jstNow / MS_PER_DAY) * MS_PER_DAY;
     // Convert back to UTC milliseconds
     return jstMidnight - JST_OFFSET_MS;
+}
+
+/**
+ * Get JST date string (YYYY-MM-DD) from timestamp
+ */
+export function getJSTDateString(timestamp: number): string {
+    const jstTimestamp = timestamp + JST_OFFSET_MS;
+    return new Date(jstTimestamp).toISOString().split('T')[0];
 }
 
 /**

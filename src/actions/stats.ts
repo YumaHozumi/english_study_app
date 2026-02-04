@@ -3,20 +3,12 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { vocabularyEntries } from '@/db/schema';
-import { eq, and, gte, lte, count } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
+import { getStartOfToday, getJSTDateString, MS_PER_DAY } from '@/lib/srs';
 
-// Helper to get start of day
-function getStartOfDay(date: Date): number {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
-}
-
-// Helper to get end of day
-function getEndOfDay(date: Date): number {
-    const d = new Date(date);
-    d.setHours(23, 59, 59, 999);
-    return d.getTime();
+// Helper to get end of today (JST)
+function getEndOfToday(): number {
+    return getStartOfToday() + MS_PER_DAY - 1;
 }
 
 export interface StudyStats {
@@ -58,8 +50,8 @@ export async function getStudyStats(): Promise<StudyStats> {
     const totalReviews = entries.reduce((sum, e) => sum + (e.reviewCount ?? 0), 0);
 
     // Today's reviews
-    const todayStart = getStartOfDay(new Date());
-    const todayEnd = getEndOfDay(new Date());
+    const todayStart = getStartOfToday();
+    const todayEnd = getEndOfToday();
     const todayReviews = entries.filter(e =>
         e.lastReviewedAt && e.lastReviewedAt >= todayStart && e.lastReviewedAt <= todayEnd
     ).length;
@@ -86,8 +78,7 @@ function calculateStreakFromEntries(entries: Array<{ lastReviewedAt: number | nu
     const reviewDates = new Set<string>();
     entries.forEach(e => {
         if (e.lastReviewedAt) {
-            const date = new Date(e.lastReviewedAt);
-            reviewDates.add(date.toISOString().split('T')[0]);
+            reviewDates.add(getJSTDateString(e.lastReviewedAt));
         }
     });
 
@@ -95,12 +86,11 @@ function calculateStreakFromEntries(entries: Array<{ lastReviewedAt: number | nu
 
     // Count consecutive days from today backwards
     let streak = 0;
-    const today = new Date();
+    const today = Date.now();
 
     for (let i = 0; i < 365; i++) {
-        const checkDate = new Date(today);
-        checkDate.setDate(checkDate.getDate() - i);
-        const dateStr = checkDate.toISOString().split('T')[0];
+        const checkDate = today - (i * MS_PER_DAY);
+        const dateStr = getJSTDateString(checkDate);
 
         if (reviewDates.has(dateStr)) {
             streak++;
@@ -122,19 +112,18 @@ function calculateHistoryFromEntries(entries: Array<{ lastReviewedAt: number | n
 
     entries.forEach(e => {
         if (e.lastReviewedAt) {
-            const date = new Date(e.lastReviewedAt).toISOString().split('T')[0];
+            const date = getJSTDateString(e.lastReviewedAt);
             reviewMap.set(date, (reviewMap.get(date) || 0) + 1);
         }
     });
 
     // Generate data for the last N days
     const result: DailyReviewData[] = [];
-    const today = new Date();
+    const today = Date.now();
 
     for (let i = days - 1; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
+        const date = today - (i * MS_PER_DAY);
+        const dateStr = getJSTDateString(date);
 
         result.push({
             date: dateStr,
@@ -180,8 +169,8 @@ export async function getStatsPageData(): Promise<{ stats: StudyStats; history: 
     const totalReviews = entries.reduce((sum, e) => sum + (e.reviewCount ?? 0), 0);
 
     // Today's reviews
-    const todayStart = getStartOfDay(new Date());
-    const todayEnd = getEndOfDay(new Date());
+    const todayStart = getStartOfToday();
+    const todayEnd = getEndOfToday();
     const todayReviews = entries.filter(e =>
         e.lastReviewedAt && e.lastReviewedAt >= todayStart && e.lastReviewedAt <= todayEnd
     ).length;
