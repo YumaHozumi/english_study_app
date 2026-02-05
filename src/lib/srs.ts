@@ -2,14 +2,14 @@
  * SRS (Spaced Repetition System) Logic
  * 
  * Based on a simplified SM-2 algorithm.
- * Intervals: 0 (same day) -> 1 day -> 3 days -> 7 days -> 14 days -> 30 days (mastered)
+ * Intervals: 1 day -> 3 days -> 7 days -> 14 days -> 30 days (mastered)
  */
 
 // Interval in days for each SRS level
-export const SRS_INTERVALS = [0, 1, 3, 7, 14, 30] as const;
+export const SRS_INTERVALS = [1, 3, 7, 14, 30] as const;
 
 // Maximum SRS level (mastered)
-export const SRS_MAX_LEVEL = 5;
+export const SRS_MAX_LEVEL = 4;
 
 // Milliseconds in a day
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;

@@ -5,6 +5,7 @@ import { db } from '@/db';
 import { vocabularyEntries } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import type { SearchResult } from '@/types';
+import { calculateNextReviewDate } from '@/lib/srs';
 
 export async function getVocabularyEntries() {
     const session = await auth();
@@ -37,6 +38,8 @@ export async function saveVocabularyEntry(result: SearchResult) {
             example: result.example,
             exampleJp: result.exampleJp,
             timestamp: Date.now(),
+            srsLevel: 0,
+            nextReviewAt: calculateNextReviewDate(0), // 翌日の00:00 JST
         })
         .returning();
 

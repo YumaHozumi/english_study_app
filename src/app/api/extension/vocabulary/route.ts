@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { vocabularyEntries } from '@/db/schema';
 import { jwtVerify } from 'jose';
+import { calculateNextReviewDate } from '@/lib/srs';
 
 const JWT_SECRET = new TextEncoder().encode(
     process.env.EXTENSION_JWT_SECRET || 'your-secret-key-change-in-production'
@@ -61,6 +62,8 @@ export async function POST(request: NextRequest) {
                 example: data.example || '',
                 exampleJp: data.exampleJp || '',
                 timestamp: Date.now(),
+                srsLevel: 0,
+                nextReviewAt: calculateNextReviewDate(0), // 翌日の00:00 JST
             })
             .returning();
 
