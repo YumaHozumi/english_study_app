@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, primaryKey, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import type { AdapterAccountType } from 'next-auth/adapters';
 
 // NextAuth.js required tables
@@ -96,7 +96,9 @@ export const pushSubscriptions = sqliteTable('push_subscription', {
     createdAt: integer('created_at', { mode: 'timestamp_ms' }).default(
         sql`(unixepoch() * 1000)`
     ),
-});
+}, (t) => [
+    uniqueIndex('user_endpoint_idx').on(t.userId, t.endpoint),
+]);
 
 // Type exports
 export type User = typeof users.$inferSelect;

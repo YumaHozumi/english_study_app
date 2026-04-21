@@ -3,7 +3,7 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { pushSubscriptions } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 interface PushSubscriptionData {
     endpoint: string;
@@ -13,34 +13,37 @@ interface PushSubscriptionData {
     };
 }
 
-/**
- * Save push subscription to database
- */
 export async function savePushSubscription(subscription: PushSubscriptionData) {
     const session = await auth();
     if (!session?.user?.id) {
         throw new Error('Unauthorized');
     }
 
-    // Check if subscription already exists for this user
     const existing = await db
         .select()
         .from(pushSubscriptions)
-        .where(eq(pushSubscriptions.userId, session.user.id))
+        .where(
+            and(
+                eq(pushSubscriptions.userId, session.user.id),
+                eq(pushSubscriptions.endpoint, subscription.endpoint)
+            )
+        )
         .limit(1);
 
     if (existing.length > 0) {
-        // Update existing subscription
         await db
             .update(pushSubscriptions)
             .set({
-                endpoint: subscription.endpoint,
                 p256dh: subscription.keys.p256dh,
                 auth: subscription.keys.auth,
             })
-            .where(eq(pushSubscriptions.userId, session.user.id));
+            .where(
+                and(
+                    eq(pushSubscriptions.userId, session.user.id),
+                    eq(pushSubscriptions.endpoint, subscription.endpoint)
+                )
+            );
     } else {
-        // Create new subscription
         await db.insert(pushSubscriptions).values({
             userId: session.user.id,
             endpoint: subscription.endpoint,
@@ -52,10 +55,7 @@ export async function savePushSubscription(subscription: PushSubscriptionData) {
     return { success: true };
 }
 
-/**
- * Delete push subscription from database
- */
-export async function deletePushSubscription() {
+export async function deletePushSubscription(endpoint: string) {
     const session = await auth();
     if (!session?.user?.id) {
         throw new Error('Unauthorized');
@@ -63,15 +63,17 @@ export async function deletePushSubscription() {
 
     await db
         .delete(pushSubscriptions)
-        .where(eq(pushSubscriptions.userId, session.user.id));
+        .where(
+            and(
+                eq(pushSubscriptions.userId, session.user.id),
+                eq(pushSubscriptions.endpoint, endpoint)
+            )
+        );
 
     return { success: true };
 }
 
-/**
- * Check if user has an active push subscription
- */
-export async function hasPushSubscription() {
+export async function hasPushSubscription(endpoint: string) {
     const session = await auth();
     if (!session?.user?.id) {
         return false;
@@ -80,7 +82,12 @@ export async function hasPushSubscription() {
     const existing = await db
         .select()
         .from(pushSubscriptions)
-        .where(eq(pushSubscriptions.userId, session.user.id))
+        .where(
+            and(
+                eq(pushSubscriptions.userId, session.user.id),
+                eq(pushSubscriptions.endpoint, endpoint)
+            )
+        )
         .limit(1);
 
     return existing.length > 0;

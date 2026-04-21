@@ -45,11 +45,19 @@ export default function SettingsPage() {
         }
     }, []);
 
-    // Check if user has subscription in DB
+    // Check if this device has subscription in DB
     useEffect(() => {
-        if (session?.user) {
-            hasPushSubscription().then(setIsSubscribed);
-        }
+        if (!session?.user || !('serviceWorker' in navigator)) return;
+        (async () => {
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+            if (!subscription) {
+                setIsSubscribed(false);
+                return;
+            }
+            const subscribed = await hasPushSubscription(subscription.endpoint);
+            setIsSubscribed(subscribed);
+        })();
     }, [session]);
 
     const handleEnableNotifications = async () => {
@@ -106,7 +114,9 @@ export default function SettingsPage() {
             }
 
             // Remove from database
-            await deletePushSubscription();
+            if (subscription) {
+                await deletePushSubscription(subscription.endpoint);
+            }
             setIsSubscribed(false);
         } catch (error) {
             console.error('Failed to disable notifications:', error);
