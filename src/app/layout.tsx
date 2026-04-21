@@ -29,6 +29,7 @@ export default function RootLayout({
     <html lang="ja">
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('app_theme');var theme=t==='dark'||t==='light'?t:window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',theme);})();` }} />
       </head>
       <body>
         <Providers>{children}</Providers>
